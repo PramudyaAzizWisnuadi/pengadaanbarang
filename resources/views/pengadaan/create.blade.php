@@ -229,8 +229,54 @@
     </template>
 @endsection
 
+@push('styles')
+    <style>
+        /* Hide number input spinners/arrows */
+        input[type=number]::-webkit-outer-spin-button,
+        input[type=number]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Firefox */
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+@endpush
+
 @push('scripts')
     <script>
+        // Disable scroll on number inputs
+        document.addEventListener('DOMContentLoaded', function() {
+            // Function to disable wheel on number inputs
+            function disableNumberInputScroll() {
+                const numberInputs = document.querySelectorAll('input[type=number]');
+                numberInputs.forEach(function(input) {
+                    input.addEventListener('wheel', function(e) {
+                        e.preventDefault();
+                    });
+                    
+                    // Also disable on focus to prevent accidental changes
+                    input.addEventListener('focus', function() {
+                        this.addEventListener('wheel', function(e) {
+                            e.preventDefault();
+                        });
+                    });
+                });
+            }
+
+            // Initial call
+            disableNumberInputScroll();
+
+            // Re-apply when new items are added
+            const originalAddNewItem = addNewItem;
+            addNewItem = function() {
+                originalAddNewItem();
+                setTimeout(disableNumberInputScroll, 100); // Small delay to ensure DOM is updated
+            };
+        });
+
         let itemIndex = 0;
 
         document.addEventListener('DOMContentLoaded', function() {

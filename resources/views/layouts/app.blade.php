@@ -231,6 +231,8 @@
                 background: rgba(255, 255, 255, 0.3);
             }
         </style>
+
+        @stack('styles')
     </head>
 
     <body>
