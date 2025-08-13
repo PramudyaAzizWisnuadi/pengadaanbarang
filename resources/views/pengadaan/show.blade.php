@@ -200,7 +200,7 @@
                             </form>
                         @endif
 
-                        @if ($pengadaan->status === 'submitted' && Auth::user()->email === 'admin@example.com')
+                        @if ($pengadaan->status === 'submitted')
                             <button type="button" class="btn btn-success" data-bs-toggle="modal"
                                 data-bs-target="#approveModal">
                                 <i class="bi bi-check-circle me-1"></i>
