@@ -248,10 +248,10 @@
             const html = clone.querySelector('.item-card').outerHTML.replace(/INDEX/g, itemIndex);
 
             const itemsList = document.getElementById('itemsList');
-            itemsList.insertAdjacentHTML('beforeend', html);
+            itemsList.insertAdjacentHTML('afterbegin', html);
 
             // Update item number
-            const newItem = itemsList.lastElementChild;
+            const newItem = itemsList.firstElementChild;
             newItem.querySelector('.item-number').textContent = itemIndex + 1;
 
             // Add remove functionality
@@ -265,6 +265,7 @@
             });
 
             itemIndex++;
+            updateItemNumbers(); // Update all item numbers after adding new item
         }
 
         function updateItemNumbers() {
