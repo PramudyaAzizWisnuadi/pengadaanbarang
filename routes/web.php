@@ -46,9 +46,9 @@ Route::middleware('auth')->group(function () {
 
     // Kategori routes
     Route::get('kategori', [KategoriController::class, 'index'])->name('kategori.index');
-    Route::get('kategori/{kategori}', [KategoriController::class, 'show'])->name('kategori.show');
     Route::get('kategori/create', [KategoriController::class, 'create'])->name('kategori.create');
     Route::post('kategori', [KategoriController::class, 'store'])->name('kategori.store');
+    Route::get('kategori/{kategori}', [KategoriController::class, 'show'])->name('kategori.show');
     Route::get('kategori/{kategori}/edit', [KategoriController::class, 'edit'])->name('kategori.edit');
     Route::put('kategori/{kategori}', [KategoriController::class, 'update'])->name('kategori.update');
     Route::delete('kategori/{kategori}', [KategoriController::class, 'destroy'])->name('kategori.destroy');
@@ -56,9 +56,9 @@ Route::middleware('auth')->group(function () {
 
     // User routes
     Route::get('users', [UserController::class, 'index'])->name('users.index');
-    Route::get('users/{user}', [UserController::class, 'show'])->name('users.show');
     Route::get('users/create', [UserController::class, 'create'])->name('users.create');
     Route::post('users', [UserController::class, 'store'])->name('users.store');
+    Route::get('users/{user}', [UserController::class, 'show'])->name('users.show');
     Route::get('users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
     Route::put('users/{user}', [UserController::class, 'update'])->name('users.update');
     Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
