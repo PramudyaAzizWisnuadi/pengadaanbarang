@@ -197,42 +197,47 @@
             .barang-table td:nth-child(1) {
                 /* No */
                 text-align: center;
-                width: 5%;
+                width: 4%;
             }
 
             .barang-table td:nth-child(2) {
-                /* Nama Barang */
-                width: 30%;
+                /* Kategori */
+                width: 12%;
             }
 
             .barang-table td:nth-child(3) {
-                /* Jumlah */
-                text-align: center;
-                width: 10%;
+                /* Nama Barang */
+                width: 25%;
             }
 
             .barang-table td:nth-child(4) {
-                /* Harga Satuan */
+                /* Spesifikasi */
+                width: 20%;
+            }
+
+            .barang-table td:nth-child(5) {
+                /* Jumlah */
+                text-align: center;
+                width: 8%;
+            }
+
+            .barang-table td:nth-child(6) {
+                /* Harga Estimasi */
                 text-align: right;
                 width: 12%;
             }
 
-            .barang-table td:nth-child(5) {
+            .barang-table td:nth-child(7) {
                 /* Total Harga */
                 text-align: right;
                 width: 12%;
                 font-weight: bold;
             }
 
-            .barang-table td:nth-child(6) {
-                /* Alasan Pengadaan */
-                width: 21%;
-            }
-
-            .barang-table td:nth-child(7) {
+            .barang-table td:nth-child(8) {
                 /* Prioritas */
                 text-align: center;
-                width: 10%;
+                width: 7%;
             }
 
             .priority-1 {
@@ -574,11 +579,12 @@
             <thead>
                 <tr>
                     <th>No</th>
+                    <th>Kategori</th>
                     <th>Nama Barang</th>
+                    <th>Spesifikasi</th>
                     <th>Jumlah</th>
-                    <th>Harga Satuan</th>
-                    <th>Total Harga</th>
-                    <th>Alasan Pengadaan</th>
+                    <th>Harga Est.</th>
+                    <th>Total</th>
                     <th>Prioritas</th>
                 </tr>
             </thead>
@@ -587,11 +593,17 @@
                 @foreach ($pengadaan->barangPengadaan as $index => $barang)
                     <tr>
                         <td>{{ $index + 1 }}</td>
-                        <td>{{ $barang->nama_barang }}</td>
+                        <td>{{ $barang->kategoriBarang->nama_kategori ?? '-' }}</td>
+                        <td>
+                            <strong>{{ $barang->nama_barang }}</strong>
+                            {{-- @if ($barang->merk)
+                                <br><small>Merk: {{ $barang->merk }}</small>
+                            @endif --}}
+                        </td>
+                        <td>{{ $barang->spesifikasi ?? '-' }}</td>
                         <td>{{ $barang->jumlah }} {{ $barang->satuan }}</td>
                         <td>Rp {{ number_format($barang->harga_estimasi, 0, ',', '.') }}</td>
                         <td>Rp {{ number_format($barang->total_harga, 0, ',', '.') }}</td>
-                        <td>{{ $barang->alasan_pengadaan ?? '-' }}</td>
                         <td>
                             <span class="priority-badge priority-{{ $barang->prioritas }}">
                                 @if ($barang->prioritas == 1)
@@ -606,6 +618,22 @@
                             </span>
                         </td>
                     </tr>
+                    @if ($barang->keterangan)
+                        <tr>
+                            <td></td>
+                            <td colspan="7" style="font-size: 10px; color: #666;">
+                                <strong>Keterangan:</strong> {{ $barang->keterangan }}
+                            </td>
+                        </tr>
+                    @endif
+                    @if ($barang->alasan_pengadaan)
+                        <tr>
+                            <td></td>
+                            <td colspan="7" style="font-size: 10px; color: #666;">
+                                <strong>Alasan Pengadaan:</strong> {{ $barang->alasan_pengadaan }}
+                            </td>
+                        </tr>
+                    @endif
                 @endforeach
             </tbody>
             </tbody>

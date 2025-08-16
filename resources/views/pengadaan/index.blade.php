@@ -156,7 +156,7 @@
                                 <th>Pemohon</th>
                                 <th>Departemen</th>
                                 <th>Tanggal</th>
-                                <th>Total Item</th>
+                                <th>Jumlah Barang</th>
                                 <th>Keperluan</th>
                                 <th>Status</th>
                                 <th>Aksi</th>
