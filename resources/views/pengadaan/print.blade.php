@@ -167,22 +167,24 @@
                 border-collapse: collapse;
                 margin: 15px 0;
                 font-size: 12px;
+                border: none;
             }
 
             .barang-table th,
             .barang-table td {
-                border: 1px solid #000;
+                border: none;
                 padding: 10px;
                 text-align: left;
                 vertical-align: top;
+                border-bottom: 1px solid #dee2e6;
             }
 
             .barang-table th {
-                background: #ffffff;
+                background: #f8f9fa;
                 color: #000;
                 font-weight: bold;
                 text-align: center;
-                border: 1px solid #000;
+                border-bottom: 2px solid #dee2e6;
                 font-size: 13px;
             }
 
@@ -191,7 +193,16 @@
             }
 
             .barang-table tr:nth-child(even) td {
-                background: #ffffff;
+                background: #f8f9fa;
+            }
+
+            .barang-table tr:hover td {
+                background: #e9ecef;
+            }
+
+            .barang-table tr:last-child th,
+            .barang-table tr:last-child td {
+                border-bottom: none;
             }
 
             .barang-table td:nth-child(1) {
@@ -462,11 +473,24 @@
                 .barang-table {
                     font-size: 11px;
                     page-break-inside: avoid;
+                    border: none;
                 }
 
                 .barang-table th,
                 .barang-table td {
                     padding: 6px;
+                    border: none;
+                    border-bottom: 1px solid #ccc;
+                }
+
+                .barang-table th {
+                    border-bottom: 2px solid #999;
+                }
+
+                .barang-table tr:nth-child(even) td {
+                    background: #f0f0f0 !important;
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
                 }
 
                 .items-table {
