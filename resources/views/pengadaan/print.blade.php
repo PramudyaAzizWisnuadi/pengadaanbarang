@@ -683,7 +683,7 @@
                         </div>
                     </td>
                     <td width="33%">
-                        <div class="signature-title">Manager Operasional</div>
+                        <div class="signature-title">Manager</div>
                         <div class="signature-box">
                             <div class="signature-line"></div>
                             <strong>(...........................)</strong><br>

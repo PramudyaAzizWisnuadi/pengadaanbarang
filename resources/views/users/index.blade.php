@@ -79,8 +79,10 @@
                         name: 'jabatan'
                     },
                     {
-                        data: 'departemen',
-                        name: 'departemen'
+                        data: 'departemen_info',
+                        name: 'departemen_info',
+                        orderable: false,
+                        searchable: false
                     },
                     {
                         data: 'is_current_user',

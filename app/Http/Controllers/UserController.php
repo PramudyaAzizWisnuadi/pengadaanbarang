@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Departemen;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules\Password;
@@ -12,12 +13,12 @@ use Yajra\DataTables\Facades\DataTables;
 class UserController extends Controller
 {
     /**
-     * Check if user is admin
+     * Check if user has admin access (admin or super_admin)
      */
     private function checkAdminAccess()
     {
-        if (Auth::user()->email !== 'admin@example.com') {
-            abort(403, 'Akses ditolak. Hanya admin yang dapat mengakses halaman ini.');
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            abort(403, 'Akses ditolak. Hanya Admin atau Super Admin yang dapat mengakses manajemen user.');
         }
     }
 
@@ -30,7 +31,7 @@ class UserController extends Controller
 
         // If AJAX request for DataTables
         if ($request->ajax()) {
-            $users = User::latest()->get();
+            $users = User::with('departemenRelation')->latest()->get();
 
             return DataTables::of($users)
                 ->addIndexColumn()
@@ -46,6 +47,17 @@ class UserController extends Controller
                     $btn .= '</div>';
                     return $btn;
                 })
+                ->addColumn('departemen_info', function ($user) {
+                    // Jika ada relationship departemen yang dimuat dan departemen_id ada
+                    if ($user->departemen_id && $user->relationLoaded('departemenRelation') && $user->departemenRelation) {
+                        return '<span class="badge bg-primary">' . $user->departemenRelation->kode_departemen . '</span><br><small>' . $user->departemenRelation->nama_departemen . '</small>';
+                    }
+                    // Jika hanya ada string departemen (data lama)
+                    elseif (!empty($user->getAttributes()['departemen'])) {
+                        return '<span class="badge bg-secondary">-</span><br><small>' . $user->getAttributes()['departemen'] . '</small>';
+                    }
+                    return '<span class="badge bg-secondary">-</span><br><small>Tidak ada departemen</small>';
+                })
                 ->addColumn('is_current_user', function ($user) {
                     if ($user->id === Auth::id()) {
                         return '<span class="badge bg-info">Anda</span>';
@@ -55,7 +67,7 @@ class UserController extends Controller
                 ->addColumn('created_date', function ($user) {
                     return $user->created_at->format('d/m/Y H:i');
                 })
-                ->rawColumns(['action', 'is_current_user'])
+                ->rawColumns(['action', 'departemen_info', 'is_current_user'])
                 ->make(true);
         }
 
@@ -68,7 +80,8 @@ class UserController extends Controller
     public function create()
     {
         $this->checkAdminAccess();
-        return view('users.create');
+        $departemens = Departemen::where('is_active', true)->orderBy('nama_departemen')->get();
+        return view('users.create', compact('departemens'));
     }
 
     /**
@@ -81,6 +94,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'jabatan' => 'required|string|max:255',
+            'departemen_id' => 'required|exists:departemens,id',
             'departemen' => 'required|string|max:255',
             'password' => ['required', 'confirmed', Password::min(8)],
         ]);
@@ -89,6 +103,7 @@ class UserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'jabatan' => $request->jabatan,
+            'departemen_id' => $request->departemen_id,
             'departemen' => $request->departemen,
             'password' => Hash::make($request->password),
         ]);
@@ -103,6 +118,7 @@ class UserController extends Controller
     public function show(User $user)
     {
         $this->checkAdminAccess();
+        $user->load('departemenRelation');
         return view('users.show', compact('user'));
     }
 
@@ -112,7 +128,8 @@ class UserController extends Controller
     public function edit(User $user)
     {
         $this->checkAdminAccess();
-        return view('users.edit', compact('user'));
+        $departemens = Departemen::where('is_active', true)->orderBy('nama_departemen')->get();
+        return view('users.edit', compact('user', 'departemens'));
     }
 
     /**
@@ -125,6 +142,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'jabatan' => 'required|string|max:255',
+            'departemen_id' => 'required|exists:departemens,id',
             'departemen' => 'required|string|max:255',
             'password' => ['nullable', 'confirmed', Password::min(8)],
         ]);
@@ -133,6 +151,7 @@ class UserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'jabatan' => $request->jabatan,
+            'departemen_id' => $request->departemen_id,
             'departemen' => $request->departemen,
         ];
 

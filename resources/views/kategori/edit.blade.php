@@ -44,6 +44,26 @@
                     </div>
                 </div>
 
+                @if ($departemens)
+                    <div class="mb-3">
+                        <label for="departemen_id" class="form-label">Departemen <span class="text-danger">*</span></label>
+                        <select class="form-select @error('departemen_id') is-invalid @enderror" id="departemen_id"
+                            name="departemen_id" required>
+                            <option value="">Pilih Departemen</option>
+                            @foreach ($departemens as $departemen)
+                                <option value="{{ $departemen->id }}"
+                                    {{ old('departemen_id', $kategori->departemen_id) == $departemen->id ? 'selected' : '' }}>
+                                    {{ $departemen->nama_departemen }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('departemen_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        <div class="form-text">Pilih departemen yang akan memiliki kategori ini.</div>
+                    </div>
+                @endif
+
                 <div class="mb-4">
                     <label for="deskripsi" class="form-label">Deskripsi</label>
                     <textarea class="form-control @error('deskripsi') is-invalid @enderror" id="deskripsi" name="deskripsi" rows="4"

@@ -55,12 +55,22 @@
                     </div>
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label for="departemen" class="form-label">Departemen <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control @error('departemen') is-invalid @enderror"
-                                id="departemen" name="departemen" value="{{ old('departemen') }}" required>
-                            @error('departemen')
+                            <label for="departemen_id" class="form-label">Departemen <span
+                                    class="text-danger">*</span></label>
+                            <select class="form-select @error('departemen_id') is-invalid @enderror" id="departemen_id"
+                                name="departemen_id" required onchange="updateDepartemenName()">
+                                <option value="">Pilih Departemen</option>
+                                @foreach ($departemens as $departemen)
+                                    <option value="{{ $departemen->id }}" data-nama="{{ $departemen->nama_departemen }}"
+                                        {{ old('departemen_id') == $departemen->id ? 'selected' : '' }}>
+                                        {{ $departemen->kode_departemen }} - {{ $departemen->nama_departemen }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('departemen_id')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+                            <input type="hidden" name="departemen" id="departemen_name" value="{{ old('departemen') }}">
                         </div>
                     </div>
                 </div>
@@ -101,4 +111,23 @@
             </form>
         </div>
     </div>
+
+    <script>
+        function updateDepartemenName() {
+            const select = document.getElementById('departemen_id');
+            const hiddenInput = document.getElementById('departemen_name');
+            const selectedOption = select.options[select.selectedIndex];
+
+            if (selectedOption.value) {
+                hiddenInput.value = selectedOption.getAttribute('data-nama');
+            } else {
+                hiddenInput.value = '';
+            }
+        }
+
+        // Set initial value if there's old input
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDepartemenName();
+        });
+    </script>
 @endsection

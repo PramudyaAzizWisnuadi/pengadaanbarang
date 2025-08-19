@@ -20,12 +20,35 @@ class PengadaanController extends Controller
      */
     public function index(Request $request)
     {
-        // Base query tanpa filter user
+        // Base query with department filtering
         $baseQuery = PengadaanBarang::query();
+
+        // Only filter by department if user is not super admin
+        if (Auth::user() && Auth::user()->departemen_id && Auth::user()->role !== 'super_admin') {
+            $baseQuery->where('departemen_id', Auth::user()->departemen_id);
+        }
+
+        // Super admin filters
+        if (Auth::user()->role === 'super_admin') {
+            // Filter by departemen
+            if ($request->filled('departemen')) {
+                $baseQuery->where('departemen', $request->departemen);
+            }
+
+            // Filter by status
+            if ($request->filled('status')) {
+                $baseQuery->where('status', $request->status);
+            }
+
+            // Filter by tanggal pengajuan
+            if ($request->filled('tanggal')) {
+                $baseQuery->whereDate('tanggal_pengajuan', $request->tanggal);
+            }
+        }
 
         // Fetch pengadaan data for blade template
         $pengadaans = (clone $baseQuery)
-            ->with(['barangPengadaan'])
+            ->with(['barangPengadaan', 'departemen'])
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -49,7 +72,16 @@ class PengadaanController extends Controller
      */
     public function create()
     {
-        $kategoris = KategoriBarang::active()->orderBy('nama_kategori')->get();
+        // Filter categories by user's department if they have one
+        $kategoris = KategoriBarang::active()->orderBy('nama_kategori');
+
+        // Only filter by department if user is not super admin
+        if (Auth::user() && Auth::user()->departemen_id && Auth::user()->role !== 'super_admin') {
+            $kategoris->where('departemen_id', Auth::user()->departemen_id);
+        }
+
+        $kategoris = $kategoris->get();
+
         return view('pengadaan.create', compact('kategoris'));
     }
 
@@ -83,10 +115,19 @@ class PengadaanController extends Controller
                 $status = 'approved'; // Langsung approved jika skip approval
             }
 
+            // Determine departemen_id based on user role
+            $departemenId = Auth::user()->departemen_id;
+            if (Auth::user()->role === 'super_admin') {
+                // For super admin, find departemen_id based on selected departemen name
+                $departemen = \App\Models\Departemen::where('nama_departemen', $request->departemen)->first();
+                $departemenId = $departemen ? $departemen->id : null;
+            }
+
             // Create pengadaan
             $pengadaan = PengadaanBarang::create([
                 'kode_pengadaan' => PengadaanBarang::generateKodePengadaan(),
                 'user_id' => Auth::id(),
+                'departemen_id' => $departemenId,
                 'nama_pemohon' => $request->nama_pemohon,
                 'jabatan' => $request->jabatan,
                 'departemen' => $request->departemen,
@@ -149,7 +190,15 @@ class PengadaanController extends Controller
                 ->with('error', 'Pengadaan hanya dapat diedit pada status draft');
         }
 
-        $kategoris = KategoriBarang::active()->orderBy('nama_kategori')->get();
+        // Filter categories by user's department if they have one
+        $kategoris = KategoriBarang::active()->orderBy('nama_kategori');
+
+        // Only filter by department if user is not super admin
+        if (Auth::user() && Auth::user()->departemen_id && Auth::user()->role !== 'super_admin') {
+            $kategoris->where('departemen_id', Auth::user()->departemen_id);
+        }
+
+        $kategoris = $kategoris->get();
         $pengadaan->load('barangPengadaan');
 
         return view('pengadaan.edit', compact('pengadaan', 'kategoris'));
@@ -372,7 +421,27 @@ class PengadaanController extends Controller
      */
     public function laporan(Request $request)
     {
+        // Check if user has permission to view reports
+        $currentUser = Auth::user();
+        if (!in_array($currentUser->role, ['admin', 'super_admin'])) {
+            abort(403, 'Akses ditolak. Hanya Admin dan Super Admin yang dapat melihat laporan.');
+        }
+
         $query = PengadaanBarang::query()->with(['barangPengadaan.kategoriBarang', 'user', 'approvedBy']);
+
+        // Role-based access control: hanya super admin yang bisa melihat semua departemen
+        if ($currentUser->role !== 'super_admin') {
+            // Admin departemen hanya bisa melihat data departemen mereka sendiri
+            if ($currentUser->departemen_id) {
+                $userDepartemen = \App\Models\Departemen::find($currentUser->departemen_id);
+                if ($userDepartemen) {
+                    $query->where('departemen', $userDepartemen->nama_departemen);
+                }
+            } else {
+                // Jika tidak ada departemen_id, fallback ke departemen string
+                $query->where('departemen', $currentUser->departemen);
+            }
+        }
 
         // Filter berdasarkan tanggal
         if ($request->filled('start_date')) {
@@ -415,7 +484,17 @@ class PengadaanController extends Controller
 
         // Data untuk filter
         $departemens = PengadaanBarang::distinct('departemen')->pluck('departemen')->sort();
-        $kategoris = KategoriBarang::active()->orderBy('nama_kategori')->get();
+
+        // Filter kategori berdasarkan departemen user
+        $kategorisQuery = KategoriBarang::active()->orderBy('nama_kategori');
+        if ($currentUser->role !== 'super_admin') {
+            // Admin departemen hanya melihat kategori departemen mereka sendiri
+            if ($currentUser->departemen_id) {
+                $kategorisQuery->where('departemen_id', $currentUser->departemen_id);
+            }
+        }
+        $kategoris = $kategorisQuery->get();
+
         $statuses = ['draft', 'submitted', 'approved', 'rejected', 'completed'];
 
         return view('pengadaan.laporan', compact('pengadaans', 'statistics', 'departemens', 'kategoris', 'statuses'));
@@ -426,9 +505,29 @@ class PengadaanController extends Controller
      */
     public function exportLaporan(Request $request)
     {
+        // Check if user has permission to export reports
+        $currentUser = Auth::user();
+        if (!in_array($currentUser->role, ['admin', 'super_admin'])) {
+            abort(403, 'Akses ditolak. Hanya Admin dan Super Admin yang dapat mengexport laporan.');
+        }
+
         $format = $request->get('format', 'excel'); // default excel
 
         $query = PengadaanBarang::query()->with(['barangPengadaan.kategoriBarang', 'user', 'approvedBy']);
+
+        // Role-based access control: hanya super admin yang bisa melihat semua departemen
+        if ($currentUser->role !== 'super_admin') {
+            // Admin departemen hanya bisa melihat data departemen mereka sendiri
+            if ($currentUser->departemen_id) {
+                $userDepartemen = \App\Models\Departemen::find($currentUser->departemen_id);
+                if ($userDepartemen) {
+                    $query->where('departemen', $userDepartemen->nama_departemen);
+                }
+            } else {
+                // Jika tidak ada departemen_id, fallback ke departemen string
+                $query->where('departemen', $currentUser->departemen);
+            }
+        }
 
         // Apply same filters as laporan method
         if ($request->filled('start_date')) {
@@ -500,7 +599,27 @@ class PengadaanController extends Controller
      */
     public function printLaporan(Request $request)
     {
+        // Check if user has permission to print reports
+        $currentUser = Auth::user();
+        if (!in_array($currentUser->role, ['admin', 'super_admin'])) {
+            abort(403, 'Akses ditolak. Hanya Admin dan Super Admin yang dapat mencetak laporan.');
+        }
+
         $query = PengadaanBarang::query()->with(['barangPengadaan.kategoriBarang', 'user', 'approvedBy']);
+
+        // Role-based access control: hanya super admin yang bisa melihat semua departemen
+        if ($currentUser->role !== 'super_admin') {
+            // Admin departemen hanya bisa melihat data departemen mereka sendiri
+            if ($currentUser->departemen_id) {
+                $userDepartemen = \App\Models\Departemen::find($currentUser->departemen_id);
+                if ($userDepartemen) {
+                    $query->where('departemen', $userDepartemen->nama_departemen);
+                }
+            } else {
+                // Jika tidak ada departemen_id, fallback ke departemen string
+                $query->where('departemen', $currentUser->departemen);
+            }
+        }
 
         // Apply same filters as laporan method
         if ($request->filled('start_date')) {
@@ -546,7 +665,27 @@ class PengadaanController extends Controller
      */
     public function statistik(Request $request)
     {
+        // Check if user has permission to view statistics
+        $currentUser = Auth::user();
+        if (!in_array($currentUser->role, ['admin', 'super_admin'])) {
+            abort(403, 'Akses ditolak. Hanya Admin dan Super Admin yang dapat melihat statistik.');
+        }
+
         $query = PengadaanBarang::query()->with(['barangPengadaan.kategoriBarang', 'user', 'approvedBy']);
+
+        // Role-based access control: hanya super admin yang bisa melihat semua departemen
+        if ($currentUser->role !== 'super_admin') {
+            // Admin departemen hanya bisa melihat data departemen mereka sendiri
+            if ($currentUser->departemen_id) {
+                $userDepartemen = \App\Models\Departemen::find($currentUser->departemen_id);
+                if ($userDepartemen) {
+                    $query->where('departemen', $userDepartemen->nama_departemen);
+                }
+            } else {
+                // Jika tidak ada departemen_id, fallback ke departemen string
+                $query->where('departemen', $currentUser->departemen);
+            }
+        }
 
         // Filter berdasarkan tanggal
         if ($request->filled('start_date')) {
@@ -622,7 +761,17 @@ class PengadaanController extends Controller
 
         // Data untuk filter
         $departemens = PengadaanBarang::distinct('departemen')->pluck('departemen')->sort();
-        $kategoris = KategoriBarang::active()->orderBy('nama_kategori')->get();
+
+        // Filter kategori berdasarkan departemen user
+        $kategorisQuery = KategoriBarang::active()->orderBy('nama_kategori');
+        if ($currentUser->role !== 'super_admin') {
+            // Admin departemen hanya melihat kategori departemen mereka sendiri
+            if ($currentUser->departemen_id) {
+                $kategorisQuery->where('departemen_id', $currentUser->departemen_id);
+            }
+        }
+        $kategoris = $kategorisQuery->get();
+
         $statuses = ['draft', 'submitted', 'approved', 'rejected', 'completed'];
 
         return view('pengadaan.statistik', compact('statistics', 'departmenStats', 'monthlyStats', 'departemens', 'kategoris', 'statuses'));

@@ -142,11 +142,77 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Daftar Pengadaan Barang</h5>
-            <a href="{{ route('pengadaan.create') }}" class="btn btn-primary">
-                <i class="bi bi-plus me-1"></i>
-                Buat Pengadaan
-            </a>
+            <div class="d-flex gap-2">
+                @if (Auth::user()->role === 'super_admin')
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse"
+                        data-bs-target="#filterCollapse" aria-expanded="false" aria-controls="filterCollapse">
+                        <i class="bi bi-funnel me-1"></i>
+                        Filter
+                    </button>
+                @endif
+                <a href="{{ route('pengadaan.create') }}" class="btn btn-primary">
+                    <i class="bi bi-plus me-1"></i>
+                    Buat Pengadaan
+                </a>
+            </div>
         </div>
+
+        @if (Auth::user()->role === 'super_admin')
+            <div class="collapse" id="filterCollapse">
+                <div class="card-body border-top">
+                    <form method="GET" action="{{ route('pengadaan.index') }}" class="row g-3">
+                        <div class="col-md-3">
+                            <label for="filter_departemen" class="form-label">Departemen</label>
+                            <select class="form-select form-select-sm" id="filter_departemen" name="departemen">
+                                <option value="">Semua Departemen</option>
+                                @php
+                                    $departemens = \App\Models\Departemen::orderBy('nama_departemen')->get();
+                                @endphp
+                                @foreach ($departemens as $dept)
+                                    <option value="{{ $dept->nama_departemen }}"
+                                        {{ request('departemen') == $dept->nama_departemen ? 'selected' : '' }}>
+                                        {{ $dept->nama_departemen }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="filter_status" class="form-label">Status</label>
+                            <select class="form-select form-select-sm" id="filter_status" name="status">
+                                <option value="">Semua Status</option>
+                                <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>Draft</option>
+                                <option value="submitted" {{ request('status') == 'submitted' ? 'selected' : '' }}>
+                                    Submitted</option>
+                                <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Approved
+                                </option>
+                                <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejected
+                                </option>
+                                <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>
+                                    Completed</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="filter_tanggal" class="form-label">Tanggal Pengajuan</label>
+                            <input type="date" class="form-control form-control-sm" id="filter_tanggal" name="tanggal"
+                                value="{{ request('tanggal') }}">
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <div class="btn-group w-100" role="group">
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-search me-1"></i>
+                                    Filter
+                                </button>
+                                <a href="{{ route('pengadaan.index') }}" class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi bi-x-circle me-1"></i>
+                                    Reset
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        @endif
+
         <div class="card-body">
             @if ($pengadaans->count() > 0)
                 <div class="table-responsive">

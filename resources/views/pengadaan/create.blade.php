@@ -41,9 +41,23 @@
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="departemen" class="form-label">Departemen <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control @error('departemen') is-invalid @enderror"
-                                id="departemen" name="departemen"
-                                value="{{ old('departemen', auth()->user()->departemen) }}" required readonly>
+                            @if(Auth::user()->role === 'super_admin')
+                                <select class="form-select @error('departemen') is-invalid @enderror" id="departemen" name="departemen" required>
+                                    <option value="">Pilih Departemen</option>
+                                    @php
+                                        $departemens = \App\Models\Departemen::orderBy('nama_departemen')->get();
+                                    @endphp
+                                    @foreach($departemens as $dept)
+                                        <option value="{{ $dept->nama_departemen }}" {{ old('departemen') == $dept->nama_departemen ? 'selected' : '' }}>
+                                            {{ $dept->nama_departemen }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            @else
+                                <input type="text" class="form-control @error('departemen') is-invalid @enderror"
+                                    id="departemen" name="departemen"
+                                    value="{{ old('departemen', auth()->user()->departemen) }}" required readonly>
+                            @endif
                             @error('departemen')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -317,6 +331,56 @@
         document.getElementById('tanggal_dibutuhkan').setAttribute('min',
             new Date(Date.now() + 86400000).toISOString().split('T')[0]
         );
+
+        @if(Auth::user()->role === 'super_admin')
+        // Handle departemen change for super admin - update kategori options
+        const departemenSelect = document.getElementById('departemen');
+        if (departemenSelect) {
+            departemenSelect.addEventListener('change', function() {
+                const selectedDepartemen = this.value;
+                updateKategoriOptions(selectedDepartemen);
+            });
+        }
+
+        function updateKategoriOptions(departemenName) {
+            if (!departemenName) {
+                // Reset all kategori selects to show all categories
+                document.querySelectorAll('.kategori-select').forEach(select => {
+                    const currentValue = select.value;
+                    select.innerHTML = '<option value="">Pilih Kategori</option>';
+                    @foreach ($kategoris as $kategori)
+                        const option{{ $kategori->id }} = new Option('{{ $kategori->nama_kategori }}', '{{ $kategori->id }}');
+                        select.appendChild(option{{ $kategori->id }});
+                    @endforeach
+                    select.value = currentValue;
+                });
+                return;
+            }
+
+            // Filter categories based on selected department
+            fetch(`/api/kategori-by-departemen/${encodeURIComponent(departemenName)}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.querySelectorAll('.kategori-select').forEach(select => {
+                        const currentValue = select.value;
+                        select.innerHTML = '<option value="">Pilih Kategori</option>';
+                        
+                        data.forEach(kategori => {
+                            const option = new Option(kategori.nama_kategori, kategori.id);
+                            select.appendChild(option);
+                        });
+                        
+                        // Restore value if still valid
+                        if (currentValue && data.some(k => k.id == currentValue)) {
+                            select.value = currentValue;
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching categories:', error);
+                });
+        }
+        @endif
 
         // Handle skip approval checkbox
         const skipApprovalCheckbox = document.getElementById('skip_approval');

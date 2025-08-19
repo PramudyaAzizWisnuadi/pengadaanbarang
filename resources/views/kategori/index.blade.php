@@ -73,7 +73,10 @@
                         <tr>
                             <th width="5%">No</th>
                             <th width="20%">Nama Kategori</th>
-                            <th width="30%">Deskripsi</th>
+                            @if (Auth::user()->role === 'super_admin')
+                                <th width="15%">Departemen</th>
+                            @endif
+                            <th width="{{ Auth::user()->role === 'super_admin' ? '25%' : '30%' }}">Deskripsi</th>
                             <th width="10%">Status</th>
                             <th width="10%">Pengadaan</th>
                             <th width="10%">Dibuat</th>
@@ -120,7 +123,12 @@
                         data: 'nama_kategori',
                         name: 'nama_kategori'
                     },
-                    {
+                    @if (Auth::user()->role === 'super_admin')
+                        {
+                            data: 'departemen.nama_departemen',
+                            name: 'departemen.nama_departemen'
+                        },
+                    @endif {
                         data: 'deskripsi',
                         name: 'deskripsi'
                     },

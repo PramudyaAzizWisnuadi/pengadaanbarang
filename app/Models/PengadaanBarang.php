@@ -11,6 +11,7 @@ class PengadaanBarang extends Model
     protected $fillable = [
         'kode_pengadaan',
         'user_id',
+        'departemen_id',
         'nama_pemohon',
         'jabatan',
         'departemen',
@@ -39,6 +40,11 @@ class PengadaanBarang extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function departemen(): BelongsTo
+    {
+        return $this->belongsTo(Departemen::class);
     }
 
     public function approvedBy(): BelongsTo

@@ -10,12 +10,18 @@ class KategoriBarang extends Model
     protected $fillable = [
         'nama_kategori',
         'deskripsi',
+        'departemen_id',
         'is_active'
     ];
 
     protected $casts = [
         'is_active' => 'boolean'
     ];
+
+    public function departemen()
+    {
+        return $this->belongsTo(Departemen::class);
+    }
 
     public function barangPengadaan(): HasMany
     {

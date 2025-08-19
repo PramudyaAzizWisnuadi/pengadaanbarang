@@ -39,7 +39,17 @@
                         </tr>
                         <tr>
                             <td class="fw-bold">Departemen:</td>
-                            <td>{{ $user->departemen }}</td>
+                            <td>
+                                @if ($user->departemen_id && $user->departemenRelation && is_object($user->departemenRelation))
+                                    <span
+                                        class="badge bg-primary me-2">{{ $user->departemenRelation->kode_departemen }}</span>
+                                    {{ $user->departemenRelation->nama_departemen }}
+                                @elseif(!empty($user->getAttributes()['departemen']))
+                                    <span class="text-muted">{{ $user->getAttributes()['departemen'] }}</span>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
                         </tr>
                         <tr>
                             <td class="fw-bold">Terdaftar:</td>

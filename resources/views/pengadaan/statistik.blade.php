@@ -50,14 +50,25 @@
                     </div>
                     <div class="col-md-2">
                         <label for="departemen" class="form-label">Departemen</label>
-                        <select class="form-select" id="departemen" name="departemen">
-                            <option value="all" {{ request('departemen') == 'all' ? 'selected' : '' }}>Semua Departemen
-                            </option>
-                            @foreach ($departemens as $dept)
-                                <option value="{{ $dept }}" {{ request('departemen') == $dept ? 'selected' : '' }}>
-                                    {{ $dept }}
+                        <select class="form-select" id="departemen" name="departemen"
+                            @if (Auth::user()->role !== 'super_admin') disabled @endif>
+                            @if (Auth::user()->role === 'super_admin')
+                                <option value="all" {{ request('departemen') == 'all' ? 'selected' : '' }}>Semua
+                                    Departemen</option>
+                                @foreach ($departemens as $dept)
+                                    <option value="{{ $dept }}"
+                                        {{ request('departemen') == $dept ? 'selected' : '' }}>
+                                        {{ $dept }}
+                                    </option>
+                                @endforeach
+                            @else
+                                <option value="{{ Auth::user()->departemenRelation->nama_departemen }}" selected>
+                                    {{ Auth::user()->departemenRelation->nama_departemen }}
                                 </option>
-                            @endforeach
+                                <!-- Hidden input for form submission -->
+                                <input type="hidden" name="departemen"
+                                    value="{{ Auth::user()->departemenRelation->nama_departemen }}">
+                            @endif
                         </select>
                     </div>
                     <div class="col-md-2">

@@ -5,6 +5,7 @@ use App\Http\Controllers\PengadaanController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\DepartemenController;
 
 Route::get('/', function () {
     return redirect('/login');
@@ -62,4 +63,16 @@ Route::middleware('auth')->group(function () {
     Route::get('users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
     Route::put('users/{user}', [UserController::class, 'update'])->name('users.update');
     Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+
+    // Departemen routes
+    Route::get('departemen', [DepartemenController::class, 'index'])->name('departemen.index');
+    Route::get('departemen/create', [DepartemenController::class, 'create'])->name('departemen.create');
+    Route::post('departemen', [DepartemenController::class, 'store'])->name('departemen.store');
+    Route::get('departemen/{departemen}', [DepartemenController::class, 'show'])->name('departemen.show');
+    Route::get('departemen/{departemen}/edit', [DepartemenController::class, 'edit'])->name('departemen.edit');
+    Route::put('departemen/{departemen}', [DepartemenController::class, 'update'])->name('departemen.update');
+    Route::delete('departemen/{departemen}', [DepartemenController::class, 'destroy'])->name('departemen.destroy');
+
+    // API routes for AJAX
+    Route::get('api/kategori-by-departemen/{departemen}', [KategoriController::class, 'getKategoriByDepartemen'])->name('api.kategori-by-departemen');
 });

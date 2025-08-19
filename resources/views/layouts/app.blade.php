@@ -293,31 +293,42 @@
                         </a>
                     </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}"
-                            href="{{ route('users.index') }}">
-                            <i class="bi bi-people"></i>
-                            Manajemen User
-                        </a>
-                    </li>
+                    @if (Auth::user() && Auth::user()->isSuperAdmin())
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('departemen.*') ? 'active' : '' }}"
+                                href="{{ route('departemen.index') }}">
+                                <i class="bi bi-building"></i>
+                                Departemen
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}"
+                                href="{{ route('users.index') }}">
+                                <i class="bi bi-people"></i>
+                                Manajemen User
+                            </a>
+                        </li>
+                    @endif
 
-                    <div class="sidebar-divider"></div>
-                    <div class="sidebar-heading">Laporan</div>
+                    @if (Auth::user() && in_array(Auth::user()->role, ['admin', 'super_admin']))
+                        <div class="sidebar-divider"></div>
+                        <div class="sidebar-heading">Laporan</div>
 
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('pengadaan.statistik') ? 'active' : '' }}"
-                            href="{{ route('pengadaan.statistik') }}">
-                            <i class="bi bi-graph-up"></i>
-                            Statistik
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('pengadaan.laporan') ? 'active' : '' }}"
-                            href="{{ route('pengadaan.laporan') }}">
-                            <i class="bi bi-file-earmark-text"></i>
-                            Laporan
-                        </a>
-                    </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('pengadaan.statistik') ? 'active' : '' }}"
+                                href="{{ route('pengadaan.statistik') }}">
+                                <i class="bi bi-graph-up"></i>
+                                Statistik
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('pengadaan.laporan') ? 'active' : '' }}"
+                                href="{{ route('pengadaan.laporan') }}">
+                                <i class="bi bi-file-earmark-text"></i>
+                                Laporan
+                            </a>
+                        </li>
+                    @endif
                 </ul>
             </div>
 

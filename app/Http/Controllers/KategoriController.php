@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\KategoriBarang;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
 
 class KategoriController extends Controller
@@ -14,9 +15,18 @@ class KategoriController extends Controller
      */
     public function index(Request $request)
     {
+        // Build base query with department filtering
+        $baseQuery = KategoriBarang::query();
+
+        // Only filter by department if user is not super admin
+        if (Auth::user() && Auth::user()->departemen_id && Auth::user()->role !== 'super_admin') {
+            $baseQuery->where('departemen_id', Auth::user()->departemen_id);
+        }
+
         // If AJAX request for DataTables
         if ($request->ajax()) {
-            $kategoris = KategoriBarang::withCount('barangPengadaan')
+            $kategoris = (clone $baseQuery)->withCount('barangPengadaan')
+                ->with('departemen')
                 ->orderBy('nama_kategori')
                 ->get();
 
@@ -64,11 +74,11 @@ class KategoriController extends Controller
                 ->make(true);
         }
 
-        // Get statistics for cards
-        $totalKategoris = KategoriBarang::count();
-        $kategoriAktif = KategoriBarang::where('is_active', true)->count();
-        $kategoriNonaktif = KategoriBarang::where('is_active', false)->count();
-        $totalPengadaan = KategoriBarang::withCount('barangPengadaan')->get()->sum('barang_pengadaan_count');
+        // Get statistics for cards with department filtering
+        $totalKategoris = (clone $baseQuery)->count();
+        $kategoriAktif = (clone $baseQuery)->where('is_active', true)->count();
+        $kategoriNonaktif = (clone $baseQuery)->where('is_active', false)->count();
+        $totalPengadaan = (clone $baseQuery)->withCount('barangPengadaan')->get()->sum('barang_pengadaan_count');
 
         return view('kategori.index', compact('totalKategoris', 'kategoriAktif', 'kategoriNonaktif', 'totalPengadaan'));
     }
@@ -78,7 +88,14 @@ class KategoriController extends Controller
      */
     public function create()
     {
-        return view('kategori.create');
+        $departemens = null;
+
+        // If super admin, get all departments for selection
+        if (Auth::user() && Auth::user()->role === 'super_admin') {
+            $departemens = \App\Models\Departemen::orderBy('nama_departemen')->get();
+        }
+
+        return view('kategori.create', compact('departemens'));
     }
 
     /**
@@ -86,15 +103,29 @@ class KategoriController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validationRules = [
             'nama_kategori' => 'required|string|max:255|unique:kategori_barangs',
             'deskripsi' => 'nullable|string|max:1000',
             'is_active' => 'nullable|boolean'
-        ]);
+        ];
+
+        // Add departemen validation for super admin
+        if (Auth::user() && Auth::user()->role === 'super_admin') {
+            $validationRules['departemen_id'] = 'required|exists:departemens,id';
+        }
+
+        $request->validate($validationRules);
+
+        // Determine departemen_id
+        $departemenId = Auth::user()->departemen_id;
+        if (Auth::user()->role === 'super_admin') {
+            $departemenId = $request->departemen_id;
+        }
 
         KategoriBarang::create([
             'nama_kategori' => $request->nama_kategori,
             'deskripsi' => $request->deskripsi,
+            'departemen_id' => $departemenId,
             'is_active' => $request->boolean('is_active', false)
         ]);
 
@@ -116,7 +147,14 @@ class KategoriController extends Controller
      */
     public function edit(KategoriBarang $kategori)
     {
-        return view('kategori.edit', compact('kategori'));
+        $departemens = null;
+
+        // If super admin, get all departments for selection
+        if (Auth::user() && Auth::user()->role === 'super_admin') {
+            $departemens = \App\Models\Departemen::orderBy('nama_departemen')->get();
+        }
+
+        return view('kategori.edit', compact('kategori', 'departemens'));
     }
 
     /**
@@ -124,17 +162,31 @@ class KategoriController extends Controller
      */
     public function update(Request $request, KategoriBarang $kategori)
     {
-        $request->validate([
+        $validationRules = [
             'nama_kategori' => 'required|string|max:255|unique:kategori_barangs,nama_kategori,' . $kategori->id,
             'deskripsi' => 'nullable|string|max:1000',
             'is_active' => 'nullable|boolean'
-        ]);
+        ];
 
-        $kategori->update([
+        // Add departemen validation for super admin
+        if (Auth::user() && Auth::user()->role === 'super_admin') {
+            $validationRules['departemen_id'] = 'required|exists:departemens,id';
+        }
+
+        $request->validate($validationRules);
+
+        $updateData = [
             'nama_kategori' => $request->nama_kategori,
             'deskripsi' => $request->deskripsi,
             'is_active' => $request->boolean('is_active', false)
-        ]);
+        ];
+
+        // Add departemen_id if super admin
+        if (Auth::user()->role === 'super_admin') {
+            $updateData['departemen_id'] = $request->departemen_id;
+        }
+
+        $kategori->update($updateData);
 
         return redirect()->route('kategori.index')
             ->with('success', 'Kategori berhasil diupdate');
@@ -188,5 +240,25 @@ class KategoriController extends Controller
 
         return redirect()->route('kategori.index')
             ->with('success', "Kategori berhasil {$status}");
+    }
+
+    /**
+     * Get kategori by departemen name for AJAX
+     */
+    public function getKategoriByDepartemen($departemenName)
+    {
+        $departemen = \App\Models\Departemen::where('nama_departemen', $departemenName)->first();
+        
+        if (!$departemen) {
+            return response()->json([]);
+        }
+
+        $kategoris = KategoriBarang::where('departemen_id', $departemen->id)
+            ->where('is_active', true)
+            ->orderBy('nama_kategori')
+            ->select('id', 'nama_kategori')
+            ->get();
+
+        return response()->json($kategoris);
     }
 }
