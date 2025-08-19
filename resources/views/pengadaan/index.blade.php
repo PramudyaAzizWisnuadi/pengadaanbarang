@@ -127,8 +127,8 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h5 class="card-title">Nilai Total</h5>
-                            <h2 class="mb-0">Rp {{ number_format($pengadaans->sum('total_estimasi'), 0, ',', '.') }}</h2>
+                            <h5 class="card-title">Nilai Total (Approved)</h5>
+                            <h2 class="mb-0">Rp {{ number_format($pengadaans->where('status', 'approved')->sum('total_estimasi'), 0, ',', '.') }}</h2>
                         </div>
                         <i class="bi bi-currency-dollar fs-1 opacity-50"></i>
                     </div>
