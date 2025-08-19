@@ -63,10 +63,9 @@
                     </div>
                     <div class="col-12">
                         <div class="mb-3">
-                            <label for="keterangan" class="form-label">Keterangan <span
-                                    class="text-danger">*</span></label>
-                            <textarea class="form-control @error('keterangan') is-invalid @enderror" id="keterangan"
-                                name="keterangan" rows="3" required>{{ old('keterangan') }}</textarea>
+                            <label for="keterangan" class="form-label">Keterangan <span class="text-danger">*</span></label>
+                            <textarea class="form-control @error('keterangan') is-invalid @enderror" id="keterangan" name="keterangan"
+                                rows="3" required>{{ old('keterangan') }}</textarea>
                             @error('keterangan')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -250,7 +249,7 @@
                     input.addEventListener('wheel', function(e) {
                         e.preventDefault();
                     });
-                    
+
                     // Also disable on focus to prevent accidental changes
                     input.addEventListener('focus', function() {
                         this.addEventListener('wheel', function(e) {
