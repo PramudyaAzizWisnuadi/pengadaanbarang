@@ -593,8 +593,8 @@
         </div>
 
         <div class="alasan-section">
-            <span class="title">Alasan Pengadaan:</span>
-            <span>{{ $pengadaan->alasan_pengadaan }}</span>
+            <span class="title">Keterangan:</span>
+            <span>{{ $pengadaan->keterangan }}</span>
         </div>
 
         <h3 class="section-title">Daftar Barang yang Diminta</h3>
@@ -647,14 +647,6 @@
                             <td></td>
                             <td colspan="7" style="font-size: 10px; color: #666;">
                                 <strong>Keterangan:</strong> {{ $barang->keterangan }}
-                            </td>
-                        </tr>
-                    @endif
-                    @if ($barang->alasan_pengadaan)
-                        <tr>
-                            <td></td>
-                            <td colspan="7" style="font-size: 10px; color: #666;">
-                                <strong>Alasan Pengadaan:</strong> {{ $barang->alasan_pengadaan }}
                             </td>
                         </tr>
                     @endif

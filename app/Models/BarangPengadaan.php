@@ -18,7 +18,6 @@ class BarangPengadaan extends Model
         'harga_estimasi',
         'total_harga',
         'keterangan',
-        'alasan_pengadaan',
         'prioritas'
     ];
 

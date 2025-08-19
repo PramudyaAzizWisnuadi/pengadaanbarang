@@ -65,11 +65,11 @@
                     </div>
                     <div class="col-12">
                         <div class="mb-3">
-                            <label for="alasan_pengadaan" class="form-label">Alasan Pengadaan <span
+                            <label for="keterangan" class="form-label">Keterangan <span
                                     class="text-danger">*</span></label>
-                            <textarea class="form-control @error('alasan_pengadaan') is-invalid @enderror" id="alasan_pengadaan"
-                                name="alasan_pengadaan" rows="3" required>{{ old('alasan_pengadaan', $pengadaan->alasan_pengadaan) }}</textarea>
-                            @error('alasan_pengadaan')
+                            <textarea class="form-control @error('keterangan') is-invalid @enderror" id="keterangan"
+                                name="keterangan" rows="3" required>{{ old('keterangan', $pengadaan->keterangan) }}</textarea>
+                            @error('keterangan')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
@@ -129,13 +129,6 @@
                                                     <label class="form-label">Spesifikasi <span
                                                             class="text-danger">*</span></label>
                                                     <textarea class="form-control" name="barang[{{ $index }}][spesifikasi]" rows="2" required>{{ $barang->spesifikasi }}</textarea>
-                                                </div>
-                                            </div>
-                                            <div class="col-12">
-                                                <div class="mb-3">
-                                                    <label class="form-label">Alasan Pengadaan <span
-                                                            class="text-danger">*</span></label>
-                                                    <textarea class="form-control" name="barang[{{ $index }}][alasan_pengadaan]" rows="2" required>{{ $barang->alasan_pengadaan ?? '' }}</textarea>
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
@@ -249,12 +242,6 @@
                         <div class="mb-3">
                             <label class="form-label">Spesifikasi <span class="text-danger">*</span></label>
                             <textarea class="form-control" name="barang[INDEX][spesifikasi]" rows="2" required></textarea>
-                        </div>
-                    </div>
-                    <div class="col-12">
-                        <div class="mb-3">
-                            <label class="form-label">Alasan Pengadaan <span class="text-danger">*</span></label>
-                            <textarea class="form-control" name="barang[INDEX][alasan_pengadaan]" rows="2" required></textarea>
                         </div>
                     </div>
                     <div class="col-md-6">

@@ -72,10 +72,10 @@
                         </div>
                     </div>
 
-                    <!-- Alasan Pengadaan -->
+                    <!-- Keterangan -->
                     <div class="mb-4">
-                        <h6 class="border-bottom pb-2">Alasan Pengadaan</h6>
-                        <p class="mb-0">{{ $pengadaan->alasan_pengadaan }}</p>
+                        <h6 class="border-bottom pb-2">Keterangan</h6>
+                        <p class="mb-0">{{ $pengadaan->keterangan }}</p>
                     </div>
 
                     <!-- Catatan Approval -->
@@ -148,15 +148,6 @@
                                                 <td></td>
                                                 <td colspan="7" class="text-muted">
                                                     <small><strong>Keterangan:</strong> {{ $barang->keterangan }}</small>
-                                                </td>
-                                            </tr>
-                                        @endif
-                                        @if ($barang->alasan_pengadaan)
-                                            <tr>
-                                                <td></td>
-                                                <td colspan="7" class="text-muted">
-                                                    <small><strong>Alasan Pengadaan:</strong>
-                                                        {{ $barang->alasan_pengadaan }}</small>
                                                 </td>
                                             </tr>
                                         @endif

@@ -62,7 +62,7 @@ class PengadaanController extends Controller
             'nama_pemohon' => 'required|string|max:255',
             'jabatan' => 'required|string|max:255',
             'departemen' => 'required|string|max:255',
-            'alasan_pengadaan' => 'required|string',
+            'keterangan' => 'required|string',
             'tanggal_dibutuhkan' => 'required|date|after:today',
             'skip_approval' => 'sometimes|boolean',
             'alasan_skip_approval' => 'nullable|required_if:skip_approval,true|string|max:500',
@@ -70,7 +70,6 @@ class PengadaanController extends Controller
             'barang.*.kategori_barang_id' => 'required|exists:kategori_barangs,id',
             'barang.*.nama_barang' => 'required|string|max:255',
             'barang.*.spesifikasi' => 'required|string',
-            'barang.*.alasan_pengadaan' => 'required|string',
             'barang.*.jumlah' => 'required|integer|min:1',
             'barang.*.satuan' => 'required|string|max:50',
             'barang.*.harga_estimasi' => 'required|numeric|min:0',
@@ -91,7 +90,7 @@ class PengadaanController extends Controller
                 'nama_pemohon' => $request->nama_pemohon,
                 'jabatan' => $request->jabatan,
                 'departemen' => $request->departemen,
-                'alasan_pengadaan' => $request->alasan_pengadaan,
+                'keterangan' => $request->keterangan,
                 'tanggal_pengajuan' => now()->toDateString(),
                 'tanggal_dibutuhkan' => $request->tanggal_dibutuhkan,
                 'status' => $status,
@@ -119,7 +118,6 @@ class PengadaanController extends Controller
                     'harga_estimasi' => $barangData['harga_estimasi'],
                     'total_harga' => $totalHarga,
                     'keterangan' => $barangData['keterangan'] ?? null,
-                    'alasan_pengadaan' => $barangData['alasan_pengadaan'],
                     'prioritas' => $barangData['prioritas'],
                 ]);
             }
@@ -171,13 +169,12 @@ class PengadaanController extends Controller
             'nama_pemohon' => 'required|string|max:255',
             'jabatan' => 'required|string|max:255',
             'departemen' => 'required|string|max:255',
-            'alasan_pengadaan' => 'required|string',
+            'keterangan' => 'required|string',
             'tanggal_dibutuhkan' => 'required|date|after:today',
             'barang' => 'required|array|min:1',
             'barang.*.kategori_barang_id' => 'required|exists:kategori_barangs,id',
             'barang.*.nama_barang' => 'required|string|max:255',
             'barang.*.spesifikasi' => 'required|string',
-            'barang.*.alasan_pengadaan' => 'required|string',
             'barang.*.jumlah' => 'required|integer|min:1',
             'barang.*.satuan' => 'required|string|max:50',
             'barang.*.harga_estimasi' => 'required|numeric|min:0',
@@ -190,7 +187,7 @@ class PengadaanController extends Controller
                 'nama_pemohon' => $request->nama_pemohon,
                 'jabatan' => $request->jabatan,
                 'departemen' => $request->departemen,
-                'alasan_pengadaan' => $request->alasan_pengadaan,
+                'keterangan' => $request->keterangan,
                 'tanggal_dibutuhkan' => $request->tanggal_dibutuhkan,
             ]);
 
@@ -215,7 +212,6 @@ class PengadaanController extends Controller
                     'harga_estimasi' => $barangData['harga_estimasi'],
                     'total_harga' => $totalHarga,
                     'keterangan' => $barangData['keterangan'] ?? null,
-                    'alasan_pengadaan' => $barangData['alasan_pengadaan'],
                     'prioritas' => $barangData['prioritas'],
                 ]);
             }
