@@ -173,7 +173,7 @@
                                     <td>{{ $pengadaan->departemen }}</td>
                                     <td>{{ $pengadaan->created_at->format('d/m/Y H:i') }}</td>
                                     <td>{{ $pengadaan->barangPengadaan->sum('jumlah') }}</td>
-                                    <td>{{ Str::limit($pengadaan->alasan_pengadaan ?? '', 30) }}</td>
+                                    <td>{{ Str::limit($pengadaan->keterangan ?? '', 30) }}</td>
                                     <td>
                                         @switch($pengadaan->status)
                                             @case('draft')
