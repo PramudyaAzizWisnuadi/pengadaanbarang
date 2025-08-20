@@ -20,7 +20,6 @@ class KategoriBarangSeeder extends Seeder
         $departemenFIN = Departemen::where('kode_departemen', 'FIN')->first();
         $departemenMKT = Departemen::where('kode_departemen', 'MKT')->first();
         $departemenOPS = Departemen::where('kode_departemen', 'OPS')->first();
-        $departemenGA = Departemen::where('kode_departemen', 'GA')->first();
 
         $kategoris = [
             // IT Department Categories
@@ -181,31 +180,31 @@ class KategoriBarangSeeder extends Seeder
             [
                 'nama_kategori' => 'Cleaning Supplies',
                 'deskripsi' => 'Peralatan dan bahan pembersih',
-                'departemen_id' => $departemenGA->id,
+                'departemen_id' => $departemenOPS->id,
                 'is_active' => true
             ],
             [
                 'nama_kategori' => 'Security System',
                 'deskripsi' => 'Sistem keamanan dan CCTV',
-                'departemen_id' => $departemenGA->id,
+                'departemen_id' => $departemenOPS->id,
                 'is_active' => true
             ],
             [
                 'nama_kategori' => 'Building Maintenance',
                 'deskripsi' => 'Peralatan untuk maintenance gedung',
-                'departemen_id' => $departemenGA->id,
+                'departemen_id' => $departemenOPS->id,
                 'is_active' => true
             ],
             [
                 'nama_kategori' => 'Transportation',
                 'deskripsi' => 'Kendaraan dan peralatan transportasi',
-                'departemen_id' => $departemenGA->id,
+                'departemen_id' => $departemenOPS->id,
                 'is_active' => true
             ],
             [
                 'nama_kategori' => 'Pantry & Kitchen',
                 'deskripsi' => 'Peralatan dapur dan pantry',
-                'departemen_id' => $departemenGA->id,
+                'departemen_id' => $departemenOPS->id,
                 'is_active' => true
             ]
         ];
