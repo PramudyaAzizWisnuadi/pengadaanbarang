@@ -33,7 +33,6 @@ class UserSeeder extends Seeder
         $departemenFIN = Departemen::where('kode_departemen', 'FIN')->first();
         $departemenMKT = Departemen::where('kode_departemen', 'MKT')->first();
         $departemenOPS = Departemen::where('kode_departemen', 'OPS')->first();
-        $departemenGA = Departemen::where('kode_departemen', 'GA')->first();
 
         $sampleUsers = [
             [
@@ -78,15 +77,6 @@ class UserSeeder extends Seeder
                 'jabatan' => 'Operations Manager',
                 'departemen_id' => $departemenOPS->id,
                 'departemen' => $departemenOPS->nama_departemen,
-                'role' => 'admin',
-                'password' => Hash::make('password'),
-            ],
-            [
-                'name' => 'Rina Marlina',
-                'email' => 'ga@mdgroup.id',
-                'jabatan' => 'GA Manager',
-                'departemen_id' => $departemenGA->id,
-                'departemen' => $departemenGA->nama_departemen,
                 'role' => 'admin',
                 'password' => Hash::make('password'),
             ]
