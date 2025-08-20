@@ -10,14 +10,14 @@ echo "📁 Cache files cleared: {$clearedFiles}\n";
 $envFile = __DIR__ . '/../.env';
 if (file_exists($envFile)) {
     $envContent = file_get_contents($envFile);
-    
+
     // Check if APP_KEY is missing or empty
     if (!preg_match('/APP_KEY=base64:.+/', $envContent)) {
         echo "🔑 Generating application key (cPanel compatible)...\n";
-        
+
         // Generate a base64 encoded 32-byte key
         $key = base64_encode(random_bytes(32));
-        
+
         if (strpos($envContent, 'APP_KEY=') !== false) {
             // Replace existing empty key
             $envContent = preg_replace('/APP_KEY=.*/', "APP_KEY=base64:{$key}", $envContent);
@@ -25,7 +25,7 @@ if (file_exists($envFile)) {
             // Add new key
             $envContent .= "\nAPP_KEY=base64:{$key}\n";
         }
-        
+
         file_put_contents($envFile, $envContent);
         echo "✅ Application key generated successfully!\n";
     } else {

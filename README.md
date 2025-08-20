@@ -4,19 +4,19 @@ Aplikasi web untuk manajemen pengadaan barang dengan sistem multi-departemen dan
 
 ## 🚀 Features
 
-- **Multi-Departemen System**: Setiap departemen memiliki data terpisah
-- **Role-Based Access**: Super Admin, Admin, dan User dengan hak akses berbeda
-- **AJAX DataTables**: Interface modern dan responsive
-- **Approval Workflow**: Sistem persetujuan pengadaan
-- **File Upload**: Upload foto untuk approval
-- **Responsive Design**: Bootstrap 5 dengan mobile support
+-   **Multi-Departemen System**: Setiap departemen memiliki data terpisah
+-   **Role-Based Access**: Super Admin, Admin, dan User dengan hak akses berbeda
+-   **AJAX DataTables**: Interface modern dan responsive
+-   **Approval Workflow**: Sistem persetujuan pengadaan
+-   **File Upload**: Upload foto untuk approval
+-   **Responsive Design**: Bootstrap 5 dengan mobile support
 
 ## 📋 System Requirements
 
-- PHP 8.1+
-- Composer
-- SQLite atau MySQL
-- Node.js & NPM (untuk asset compilation)
+-   PHP 8.1+
+-   Composer
+-   SQLite atau MySQL
+-   Node.js & NPM (untuk asset compilation)
 
 ## ⚡ Quick Start
 
@@ -46,11 +46,13 @@ npm run dev
 ### 🌐 Production Deployment
 
 #### Normal Hosting (VPS/Dedicated)
+
 ```bash
 php scripts/deploy-cpanel.php
 ```
 
 #### 🚨 cPanel with proc_open() Disabled
+
 If you encounter `Call to undefined function Laravel\Prompts\proc_open()`:
 
 ```bash
@@ -63,7 +65,7 @@ php scripts/cpanel-key-generator.php
 
 ```
 Super Admin:
-Email: superadmin@mdgroup.id  
+Email: superadmin@mdgroup.id
 Password: Murahsetiaphari
 
 IT Staff:
@@ -73,9 +75,9 @@ Password: password
 
 ## 📖 Documentation
 
-- [Production Deployment Guide](DEPLOYMENT.md)
-- [cPanel Specific Guide](CPANEL-DEPLOYMENT.md)
-- [Database Migration Guide](database/README.md)
+-   [Production Deployment Guide](DEPLOYMENT.md)
+-   [cPanel Specific Guide](CPANEL-DEPLOYMENT.md)
+-   [Database Migration Guide](database/README.md)
 
 ---
 
@@ -83,13 +85,13 @@ Password: password
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+-   [Simple, fast routing engine](https://laravel.com/docs/routing).
+-   [Powerful dependency injection container](https://laravel.com/docs/container).
+-   Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
+-   Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
+-   Database agnostic [schema migrations](https://laravel.com/docs/migrations).
+-   [Robust background job processing](https://laravel.com/docs/queues).
+-   [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
 Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
@@ -107,14 +109,14 @@ We would like to extend our thanks to the following sponsors for funding Laravel
 
 ### Premium Partners
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+-   **[Vehikl](https://vehikl.com)**
+-   **[Tighten Co.](https://tighten.co)**
+-   **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
+-   **[64 Robots](https://64robots.com)**
+-   **[Curotec](https://www.curotec.com/services/technologies/laravel)**
+-   **[DevSquad](https://devsquad.com/hire-laravel-developers)**
+-   **[Redberry](https://redberry.international/laravel-development)**
+-   **[Active Logic](https://activelogic.com)**
 
 ## Contributing
 

@@ -63,10 +63,10 @@ if ($return_var === 0) {
 $envContent = file_get_contents($envFile);
 if (strpos($envContent, 'APP_KEY=') === false || preg_match('/APP_KEY=\s*$/m', $envContent) || !preg_match('/APP_KEY=base64:.+/', $envContent)) {
     echo "🔑 Generating application key (cPanel compatible)...\n";
-    
+
     // Generate key manually without Laravel Prompts
     $key = base64_encode(random_bytes(32));
-    
+
     if (strpos($envContent, 'APP_KEY=') !== false) {
         // Replace existing empty key
         $envContent = preg_replace('/APP_KEY=.*/', "APP_KEY=base64:{$key}", $envContent);
@@ -74,7 +74,7 @@ if (strpos($envContent, 'APP_KEY=') === false || preg_match('/APP_KEY=\s*$/m', $
         // Add new key
         $envContent .= "\nAPP_KEY=base64:{$key}\n";
     }
-    
+
     file_put_contents($envFile, $envContent);
     echo "✅ Application key generated successfully!\n";
     echo "🔐 Key: APP_KEY=base64:{$key}\n";

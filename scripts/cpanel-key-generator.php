@@ -2,7 +2,7 @@
 
 /**
  * cPanel Key Generator (No proc_open required)
- * 
+ *
  * Specifically designed for cPanel hosting where proc_open() is disabled
  * This script generates Laravel application key without using artisan command
  */
