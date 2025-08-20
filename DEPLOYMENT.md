@@ -51,7 +51,11 @@ php artisan key:generate
 ### 4. **Install Dependencies**
 
 ```bash
-composer install --optimize-autoloader --no-dev
+# PENTING: Install tanpa dev dependencies untuk production
+composer install --no-dev --optimize-autoloader
+
+# ATAU gunakan script production yang sudah disiapkan
+composer run production
 ```
 
 ### 5. **Set Permissions**
@@ -64,7 +68,17 @@ chmod -R 755 bootstrap/cache
 ### 6. **Run Migrations**
 
 ```bash
-# Jalankan migrations
+# OPSI A: Jalankan production fix script (RECOMMENDED)
+php scripts/production-fix.php
+
+# Kemudian jalankan migrations
+php artisan migrate --force
+
+# OPSI B: Manual troubleshooting jika ada masalah
+export APP_ENV=production
+composer install --no-dev --optimize-autoloader
+php artisan config:clear
+rm -f bootstrap/cache/config.php bootstrap/cache/routes.php bootstrap/cache/services.php
 php artisan migrate --force
 
 # Jalankan seeders untuk data awal
@@ -165,6 +179,11 @@ php artisan storage:link
 ```bash
 # If foreign key constraints fail, check table order
 php artisan migrate:status
+
+# If Laravel Pail error occurs
+composer install --no-dev --optimize-autoloader
+php artisan config:clear
+rm -f bootstrap/cache/config.php
 ```
 
 **2. Permission Errors:**
