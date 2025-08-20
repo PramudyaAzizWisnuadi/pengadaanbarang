@@ -3,7 +3,44 @@
 /**
  * Production Bootstrap Fix
  *
- * This file helps handle dev-only ServiceProvider issues in production
+ * This file helps handle dev-onlecho "✅ Production bootstrap fix completed\n";
+echo "📁 Cache files cleared: {$clearedFiles}\n";
+
+// Step 5: Generate Application Key if needed (cPanel friendly)
+$envFile = __DIR__ . '/../.env';
+if (file_exists($envFile)) {
+    $envContent = file_get_contents($envFile);
+    
+    // Check if APP_KEY is missing or empty
+    if (!preg_match('/APP_KEY=base64:.+/', $envContent)) {
+        echo "🔑 Generating application key (cPanel compatible)...\n";
+        
+        // Generate a base64 encoded 32-byte key
+        $key = base64_encode(random_bytes(32));
+        
+        if (strpos($envContent, 'APP_KEY=') !== false) {
+            // Replace existing empty key
+            $envContent = preg_replace('/APP_KEY=.*/', "APP_KEY=base64:{$key}", $envContent);
+        } else {
+            // Add new key
+            $envContent .= "\nAPP_KEY=base64:{$key}\n";
+        }
+        
+        file_put_contents($envFile, $envContent);
+        echo "✅ Application key generated successfully!\n";
+    } else {
+        echo "ℹ️  Application key already exists\n";
+    }
+}
+
+echo "🎯 Ready for migration!\n\n";
+
+echo "Next steps:\n";
+echo "1. composer install --no-dev --optimize-autoloader\n";
+echo "2. [KEY GENERATED] Application key is ready\n";
+echo "3. php artisan migrate --force\n";
+echo "4. php artisan db:seed --force\n";
+echo "5. php artisan config:cache\n";Provider issues in production
  * Fixes: Laravel Pail, Laravel Breeze, and other dev-only packages
  */
 

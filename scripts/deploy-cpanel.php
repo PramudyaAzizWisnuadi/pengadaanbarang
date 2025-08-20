@@ -59,14 +59,27 @@ if ($return_var === 0) {
     echo "⚠️  Composer install had issues, continuing...\n";
 }
 
-// Step 5: Generate key if needed
+// Step 5: Generate key if needed (cPanel Compatible - No proc_open)
 $envContent = file_get_contents($envFile);
-if (strpos($envContent, 'APP_KEY=') === false || preg_match('/APP_KEY=\s*$/m', $envContent)) {
-    echo "🔑 Generating application key...\n";
-    exec('php artisan key:generate --force', $output, $return_var);
-    if ($return_var === 0) {
-        echo "✅ Application key generated\n";
+if (strpos($envContent, 'APP_KEY=') === false || preg_match('/APP_KEY=\s*$/m', $envContent) || !preg_match('/APP_KEY=base64:.+/', $envContent)) {
+    echo "🔑 Generating application key (cPanel compatible)...\n";
+    
+    // Generate key manually without Laravel Prompts
+    $key = base64_encode(random_bytes(32));
+    
+    if (strpos($envContent, 'APP_KEY=') !== false) {
+        // Replace existing empty key
+        $envContent = preg_replace('/APP_KEY=.*/', "APP_KEY=base64:{$key}", $envContent);
+    } else {
+        // Add new key
+        $envContent .= "\nAPP_KEY=base64:{$key}\n";
     }
+    
+    file_put_contents($envFile, $envContent);
+    echo "✅ Application key generated successfully!\n";
+    echo "🔐 Key: APP_KEY=base64:{$key}\n";
+} else {
+    echo "ℹ️  Application key already exists\n";
 }
 
 // Step 6: Database setup
