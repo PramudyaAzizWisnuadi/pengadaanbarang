@@ -6,10 +6,6 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h4 class="mb-0">Detail User</h4>
         <div>
-            <a href="{{ route('users.edit', $user) }}" class="btn btn-warning me-2">
-                <i class="bi bi-pencil me-1"></i>
-                Edit
-            </a>
             <a href="{{ route('users.index') }}" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left me-1"></i>
                 Kembali
@@ -77,11 +73,11 @@
                         </a>
 
                         @if ($user->id !== Auth::id())
-                            <form action="{{ route('users.destroy', $user) }}" method="POST" class="d-inline">
+                            <form action="{{ route('users.destroy', $user) }}" method="POST" class="d-inline"
+                                onsubmit="return confirmDeleteUser(event)">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-danger w-100"
-                                    onclick="return confirm('Yakin ingin menghapus user ini? Tindakan ini tidak dapat dibatalkan.')">
+                                <button type="submit" class="btn btn-danger w-100">
                                     <i class="bi bi-trash me-1"></i>
                                     Hapus User
                                 </button>
@@ -111,3 +107,27 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        function confirmDeleteUser(event) {
+            event.preventDefault();
+
+            Swal.fire({
+                title: 'Konfirmasi Hapus',
+                text: 'Yakin ingin menghapus user ini? Tindakan ini tidak dapat dibatalkan.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    event.target.submit();
+                }
+            });
+            return false;
+        }
+    </script>
+@endpush

@@ -313,7 +313,15 @@
                     this.closest('.item-card').remove();
                     updateItemNumbers();
                 } else {
-                    alert('Minimal harus ada satu barang');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Peringatan!',
+                        text: 'Minimal harus ada satu barang',
+                        timer: 2000,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end'
+                    });
                 }
             });
 

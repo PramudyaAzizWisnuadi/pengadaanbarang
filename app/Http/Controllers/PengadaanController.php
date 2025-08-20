@@ -25,7 +25,11 @@ class PengadaanController extends Controller
 
         // Only filter by department if user is not super admin
         if (Auth::user() && Auth::user()->departemen_id && Auth::user()->role !== 'super_admin') {
-            $baseQuery->where('departemen_id', Auth::user()->departemen_id);
+            // Get user's department name to filter pengadaan
+            $userDepartemen = \App\Models\Departemen::find(Auth::user()->departemen_id);
+            if ($userDepartemen) {
+                $baseQuery->where('departemen', $userDepartemen->nama_departemen);
+            }
         }
 
         // Super admin filters
@@ -48,7 +52,7 @@ class PengadaanController extends Controller
 
         // Fetch pengadaan data for blade template
         $pengadaans = (clone $baseQuery)
-            ->with(['barangPengadaan', 'departemen'])
+            ->with(['barangPengadaan'])
             ->orderBy('created_at', 'desc')
             ->get();
 

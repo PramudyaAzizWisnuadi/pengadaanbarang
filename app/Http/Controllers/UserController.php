@@ -13,12 +13,12 @@ use Yajra\DataTables\Facades\DataTables;
 class UserController extends Controller
 {
     /**
-     * Check if user has admin access (admin or super_admin)
+     * Check if user has super admin access
      */
-    private function checkAdminAccess()
+    private function checkSuperAdminAccess()
     {
-        if (!Auth::user() || !Auth::user()->isAdmin()) {
-            abort(403, 'Akses ditolak. Hanya Admin atau Super Admin yang dapat mengakses manajemen user.');
+        if (!Auth::user() || !Auth::user()->isSuperAdmin()) {
+            abort(403, 'Akses ditolak. Hanya Super Admin yang dapat mengakses manajemen user.');
         }
     }
 
@@ -27,7 +27,7 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        $this->checkAdminAccess();
+        $this->checkSuperAdminAccess();
 
         // If AJAX request for DataTables
         if ($request->ajax()) {
@@ -71,7 +71,9 @@ class UserController extends Controller
                 ->make(true);
         }
 
-        return view('users.index');
+        // Regular view request - load users directly
+        $users = User::with('departemenRelation')->latest()->get();
+        return view('users.index', compact('users'));
     }
 
     /**
@@ -79,7 +81,7 @@ class UserController extends Controller
      */
     public function create()
     {
-        $this->checkAdminAccess();
+        $this->checkSuperAdminAccess();
         $departemens = Departemen::where('is_active', true)->orderBy('nama_departemen')->get();
         return view('users.create', compact('departemens'));
     }
@@ -89,13 +91,14 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        $this->checkAdminAccess();
+        $this->checkSuperAdminAccess();
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'jabatan' => 'required|string|max:255',
             'departemen_id' => 'required|exists:departemens,id',
             'departemen' => 'required|string|max:255',
+            'role' => 'required|in:user,admin,super_admin',
             'password' => ['required', 'confirmed', Password::min(8)],
         ]);
 
@@ -105,6 +108,7 @@ class UserController extends Controller
             'jabatan' => $request->jabatan,
             'departemen_id' => $request->departemen_id,
             'departemen' => $request->departemen,
+            'role' => $request->role,
             'password' => Hash::make($request->password),
         ]);
 
@@ -117,7 +121,7 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        $this->checkAdminAccess();
+        $this->checkSuperAdminAccess();
         $user->load('departemenRelation');
         return view('users.show', compact('user'));
     }
@@ -127,7 +131,7 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        $this->checkAdminAccess();
+        $this->checkSuperAdminAccess();
         $departemens = Departemen::where('is_active', true)->orderBy('nama_departemen')->get();
         return view('users.edit', compact('user', 'departemens'));
     }
@@ -137,13 +141,14 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        $this->checkAdminAccess();
+        $this->checkSuperAdminAccess();
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'jabatan' => 'required|string|max:255',
             'departemen_id' => 'required|exists:departemens,id',
             'departemen' => 'required|string|max:255',
+            'role' => 'required|in:user,admin,super_admin',
             'password' => ['nullable', 'confirmed', Password::min(8)],
         ]);
 
@@ -153,6 +158,7 @@ class UserController extends Controller
             'jabatan' => $request->jabatan,
             'departemen_id' => $request->departemen_id,
             'departemen' => $request->departemen,
+            'role' => $request->role,
         ];
 
         // Only update password if provided
@@ -171,7 +177,7 @@ class UserController extends Controller
      */
     public function destroy(Request $request, User $user)
     {
-        $this->checkAdminAccess();
+        $this->checkSuperAdminAccess();
 
         // Prevent deleting the current user
         if ($user->id === Auth::id()) {

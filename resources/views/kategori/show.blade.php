@@ -145,7 +145,7 @@
 
                         @if ($kategori->barangPengadaan->count() == 0)
                             <form action="{{ route('kategori.destroy', $kategori) }}" method="POST"
-                                onsubmit="return confirm('Yakin ingin menghapus kategori ini? Tindakan ini tidak dapat dibatalkan.')">
+                                onsubmit="return confirmDeleteKategori(event, '{{ $kategori->nama_kategori }}')">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-danger w-100">
@@ -211,4 +211,27 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function confirmDeleteKategori(event, namaKategori) {
+            event.preventDefault();
+            
+            Swal.fire({
+                title: 'Konfirmasi Hapus',
+                text: `Apakah Anda yakin ingin menghapus kategori "${namaKategori}"? Tindakan ini tidak dapat dibatalkan!`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    event.target.submit();
+                }
+            });
+            
+            return false;
+        }
+    </script>
 @endsection

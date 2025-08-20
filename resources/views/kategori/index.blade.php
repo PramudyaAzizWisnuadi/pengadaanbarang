@@ -181,57 +181,106 @@
                 var id = $(this).data('id');
                 var button = $(this);
 
-                if (confirm('Apakah Anda yakin ingin mengubah status kategori ini?')) {
-                    $.ajax({
-                        url: "{{ route('kategori.toggle-status', ':id') }}".replace(':id', id),
-                        type: 'POST',
-                        data: {
-                            '_token': '{{ csrf_token() }}'
-                        },
-                        success: function(response) {
-                            if (response.success) {
-                                table.ajax.reload(null, false);
-                                showNotification('success', response.message);
-                            } else {
-                                showNotification('error', response.message ||
-                                    'Terjadi kesalahan');
+                Swal.fire({
+                    title: 'Konfirmasi',
+                    text: 'Apakah Anda yakin ingin mengubah status kategori ini?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ya, Ubah!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: "{{ route('kategori.toggle-status', ':id') }}".replace(':id', id),
+                            type: 'POST',
+                            data: {
+                                '_token': '{{ csrf_token() }}'
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    table.ajax.reload(null, false);
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Berhasil!',
+                                        text: response.message,
+                                        timer: 2000,
+                                        showConfirmButton: false,
+                                        toast: true,
+                                        position: 'top-end'
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Gagal!',
+                                        text: response.message || 'Terjadi kesalahan'
+                                    });
+                                }
+                            },
+                            error: function() {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error!',
+                                    text: 'Terjadi kesalahan saat mengubah status'
+                                });
                             }
-                        },
-                        error: function() {
-                            showNotification('error', 'Terjadi kesalahan saat mengubah status');
-                        }
-                    });
-                }
+                        });
+                    }
+                });
             });
 
             // Handle delete
             $('#kategorisTable').on('click', '.delete-kategori', function() {
                 var id = $(this).data('id');
 
-                if (confirm(
-                        'Apakah Anda yakin ingin menghapus kategori ini? Tindakan ini tidak dapat dibatalkan.'
-                    )) {
-                    $.ajax({
-                        url: "{{ route('kategori.destroy', ':id') }}".replace(':id', id),
-                        type: 'DELETE',
-                        data: {
-                            '_token': '{{ csrf_token() }}'
-                        },
-                        success: function(response) {
-                            if (response.success) {
-                                table.ajax.reload(null, false);
-                                showNotification('success', response.message);
-                            } else {
-                                showNotification('error', response.message ||
-                                    'Terjadi kesalahan');
+                Swal.fire({
+                    title: 'Konfirmasi Hapus',
+                    text: 'Apakah Anda yakin ingin menghapus kategori ini? Tindakan ini tidak dapat dibatalkan.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: "{{ route('kategori.destroy', ':id') }}".replace(':id', id),
+                            type: 'DELETE',
+                            data: {
+                                '_token': '{{ csrf_token() }}'
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    table.ajax.reload(null, false);
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Berhasil!',
+                                        text: response.message,
+                                        timer: 2000,
+                                        showConfirmButton: false,
+                                        toast: true,
+                                        position: 'top-end'
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Gagal!',
+                                        text: response.message || 'Terjadi kesalahan'
+                                    });
+                                }
+                            },
+                            error: function() {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error!',
+                                    text: 'Terjadi kesalahan saat menghapus kategori'
+                                });
                             }
-                        },
-                        error: function() {
-                            showNotification('error',
-                                'Terjadi kesalahan saat menghapus kategori');
-                        }
-                    });
-                }
+                        });
+                    }
+                });
             });
 
             // Notification function

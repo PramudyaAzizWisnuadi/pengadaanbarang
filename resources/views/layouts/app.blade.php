@@ -17,6 +17,9 @@
         <!-- Bootstrap CSS -->
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+        
+        <!-- SweetAlert2 CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.27/dist/sweetalert2.min.css" rel="stylesheet">
 
         <!-- Custom CSS -->
         <style>
@@ -389,31 +392,6 @@
 
             <!-- Content -->
             <div class="content-wrapper">
-                @if (session('success'))
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        {{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                @endif
-
-                @if (session('error'))
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        {{ session('error') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                @endif
-
-                @if ($errors->any())
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <ul class="mb-0">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                @endif
-
                 @yield('content')
             </div>
         </main>
@@ -423,6 +401,83 @@
 
         <!-- Bootstrap JS -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        
+        <!-- SweetAlert2 JS -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.27/dist/sweetalert2.all.min.js"></script>
+
+        <!-- SweetAlert Notifications -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                @if (session('success'))
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: '{{ session('success') }}',
+                        timer: 3000,
+                        timerProgressBar: true,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end'
+                    });
+                @endif
+
+                @if (session('error'))
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal!',
+                        text: '{{ session('error') }}',
+                        timer: 5000,
+                        timerProgressBar: true,
+                        showConfirmButton: true,
+                        toast: true,
+                        position: 'top-end'
+                    });
+                @endif
+
+                @if (session('warning'))
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Peringatan!',
+                        text: '{{ session('warning') }}',
+                        timer: 4000,
+                        timerProgressBar: true,
+                        showConfirmButton: true,
+                        toast: true,
+                        position: 'top-end'
+                    });
+                @endif
+
+                @if (session('info'))
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Informasi',
+                        text: '{{ session('info') }}',
+                        timer: 3000,
+                        timerProgressBar: true,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end'
+                    });
+                @endif
+
+                @if ($errors->any())
+                    let errorMessages = [];
+                    @foreach ($errors->all() as $error)
+                        errorMessages.push('{{ $error }}');
+                    @endforeach
+                    
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Terjadi Kesalahan!',
+                        html: '<ul style="text-align: left; margin: 0; padding-left: 20px;">' + 
+                              errorMessages.map(error => '<li>' + error + '</li>').join('') + 
+                              '</ul>',
+                        showConfirmButton: true,
+                        confirmButtonText: 'OK'
+                    });
+                @endif
+            });
+        </script>
 
         <!-- Custom JS -->
         <script>

@@ -13,11 +13,6 @@ return new class extends Migration
     {
         Schema::create('departemens', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_departemen')->unique();
-            $table->string('kode_departemen')->unique();
-            $table->text('deskripsi')->nullable();
-            $table->string('kepala_departemen')->nullable();
-            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }

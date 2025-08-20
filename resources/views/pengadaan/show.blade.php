@@ -182,7 +182,7 @@
                             </a>
 
                             <form action="{{ route('pengadaan.submit', $pengadaan) }}" method="POST"
-                                onsubmit="return confirm('Yakin ingin submit pengadaan ini? Setelah disubmit tidak dapat diedit lagi.')">
+                                onsubmit="return confirmSubmit(event)">
                                 @csrf
                                 <button type="submit" class="btn btn-primary w-100">
                                     <i class="bi bi-send me-1"></i>
@@ -213,7 +213,7 @@
 
                         @if ($pengadaan->status === 'approved')
                             <form action="{{ route('pengadaan.complete', $pengadaan) }}" method="POST"
-                                onsubmit="return confirm('Yakin ingin menyelesaikan pengadaan ini? Status akan berubah menjadi Completed.')">
+                                onsubmit="return confirmComplete(event)">
                                 @csrf
                                 <button type="submit" class="btn btn-success w-100">
                                     <i class="bi bi-check2-all me-1"></i>
@@ -526,6 +526,47 @@
 
             const bsModal = new bootstrap.Modal(modal);
             bsModal.show();
+        }
+
+        // SweetAlert confirmations
+        function confirmSubmit(event) {
+            event.preventDefault();
+            
+            Swal.fire({
+                title: 'Konfirmasi Submit',
+                text: 'Yakin ingin submit pengadaan ini? Setelah disubmit tidak dapat diedit lagi.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Submit!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    event.target.submit();
+                }
+            });
+            return false;
+        }
+
+        function confirmComplete(event) {
+            event.preventDefault();
+            
+            Swal.fire({
+                title: 'Konfirmasi Penyelesaian',
+                text: 'Yakin ingin menyelesaikan pengadaan ini? Status akan berubah menjadi Completed.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Selesaikan!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    event.target.submit();
+                }
+            });
+            return false;
         }
     </script>
 @endpush

@@ -64,7 +64,7 @@
                                             @if ($departemen->users_count == 0 && $departemen->pengadaan_barangs_count == 0)
                                                 <form action="{{ route('departemen.destroy', $departemen) }}"
                                                     method="POST" class="d-inline"
-                                                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus departemen ini?')">
+                                                    onsubmit="return confirmDeleteDepartemen(event, '{{ $departemen->nama_departemen }}')">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-outline-danger" title="Hapus">
@@ -89,3 +89,27 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+<script>
+    function confirmDeleteDepartemen(event, departemenName) {
+        event.preventDefault();
+
+        Swal.fire({
+            title: 'Konfirmasi Hapus',
+            text: `Apakah Anda yakin ingin menghapus departemen "${departemenName}"?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                event.target.submit();
+            }
+        });
+        return false;
+    }
+</script>
+@endpush
