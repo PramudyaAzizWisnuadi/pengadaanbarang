@@ -531,7 +531,7 @@
         // SweetAlert confirmations
         function confirmSubmit(event) {
             event.preventDefault();
-            
+
             Swal.fire({
                 title: 'Konfirmasi Submit',
                 text: 'Yakin ingin submit pengadaan ini? Setelah disubmit tidak dapat diedit lagi.',
@@ -551,7 +551,7 @@
 
         function confirmComplete(event) {
             event.preventDefault();
-            
+
             Swal.fire({
                 title: 'Konfirmasi Penyelesaian',
                 text: 'Yakin ingin menyelesaikan pengadaan ini? Status akan berubah menjadi Completed.',

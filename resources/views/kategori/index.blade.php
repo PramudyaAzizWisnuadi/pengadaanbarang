@@ -193,7 +193,8 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
-                            url: "{{ route('kategori.toggle-status', ':id') }}".replace(':id', id),
+                            url: "{{ route('kategori.toggle-status', ':id') }}".replace(
+                                ':id', id),
                             type: 'POST',
                             data: {
                                 '_token': '{{ csrf_token() }}'
@@ -214,7 +215,8 @@
                                     Swal.fire({
                                         icon: 'error',
                                         title: 'Gagal!',
-                                        text: response.message || 'Terjadi kesalahan'
+                                        text: response.message ||
+                                            'Terjadi kesalahan'
                                     });
                                 }
                             },
@@ -246,7 +248,8 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
-                            url: "{{ route('kategori.destroy', ':id') }}".replace(':id', id),
+                            url: "{{ route('kategori.destroy', ':id') }}".replace(':id',
+                                id),
                             type: 'DELETE',
                             data: {
                                 '_token': '{{ csrf_token() }}'
@@ -267,7 +270,8 @@
                                     Swal.fire({
                                         icon: 'error',
                                         title: 'Gagal!',
-                                        text: response.message || 'Terjadi kesalahan'
+                                        text: response.message ||
+                                            'Terjadi kesalahan'
                                     });
                                 }
                             },

@@ -17,7 +17,7 @@
         <!-- Bootstrap CSS -->
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-        
+
         <!-- SweetAlert2 CSS -->
         <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.27/dist/sweetalert2.min.css" rel="stylesheet">
 
@@ -401,7 +401,7 @@
 
         <!-- Bootstrap JS -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        
+
         <!-- SweetAlert2 JS -->
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.27/dist/sweetalert2.all.min.js"></script>
 
@@ -465,13 +465,13 @@
                     @foreach ($errors->all() as $error)
                         errorMessages.push('{{ $error }}');
                     @endforeach
-                    
+
                     Swal.fire({
                         icon: 'error',
                         title: 'Terjadi Kesalahan!',
-                        html: '<ul style="text-align: left; margin: 0; padding-left: 20px;">' + 
-                              errorMessages.map(error => '<li>' + error + '</li>').join('') + 
-                              '</ul>',
+                        html: '<ul style="text-align: left; margin: 0; padding-left: 20px;">' +
+                            errorMessages.map(error => '<li>' + error + '</li>').join('') +
+                            '</ul>',
                         showConfirmButton: true,
                         confirmButtonText: 'OK'
                     });

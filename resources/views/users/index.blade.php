@@ -17,7 +17,7 @@
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-striped table-hover">
+                <table class="table table-striped table-hover" id="usersTable">
                     <thead class="table-dark">
                         <tr>
                             <th width="5%">No</th>
@@ -31,88 +31,160 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($users as $index => $user)
-                            <tr>
-                                <td>{{ $index + 1 }}</td>
-                                <td>
-                                    {{ $user->name }}
-                                    @if($user->id === Auth::id())
-                                        <span class="badge bg-info ms-1">Anda</span>
-                                    @endif
-                                </td>
-                                <td>{{ $user->email }}</td>
-                                <td>{{ $user->jabatan }}</td>
-                                <td>
-                                    @if($user->departemenRelation)
-                                        <span class="badge bg-primary">{{ $user->departemenRelation->kode_departemen }}</span><br>
-                                        <small>{{ $user->departemenRelation->nama_departemen }}</small>
-                                    @else
-                                        <span class="badge bg-secondary">-</span><br>
-                                        <small>{{ $user->departemen ?? 'Tidak ada departemen' }}</small>
-                                    @endif
-                                </td>
-                                <td>
-                                    @if($user->role === 'super_admin')
-                                        <span class="badge bg-danger">Super Admin</span>
-                                    @elseif($user->role === 'admin')
-                                        <span class="badge bg-warning">Admin</span>
-                                    @else
-                                        <span class="badge bg-success">User</span>
-                                    @endif
-                                </td>
-                                <td>{{ $user->created_at->format('d/m/Y') }}</td>
-                                <td>
-                                    <div class="btn-group btn-group-sm" role="group">
-                                        <a href="{{ route('users.show', $user) }}" class="btn btn-outline-info" title="Lihat">
-                                            <i class="bi bi-eye"></i>
-                                        </a>
-                                        <a href="{{ route('users.edit', $user) }}" class="btn btn-outline-warning" title="Edit">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        @if($user->id !== Auth::id())
-                                            <form method="POST" action="{{ route('users.destroy', $user) }}" style="display: inline;"
-                                                onsubmit="return confirmDeleteUser(event, '{{ $user->name }}')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-outline-danger" title="Hapus">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </form>
-                                        @endif
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="8" class="text-center">Tidak ada data user</td>
-                            </tr>
-                        @endforelse
+                        <!-- Data will be loaded via AJAX -->
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <script>
-        function confirmDeleteUser(event, userName) {
-            event.preventDefault();
-            
-            Swal.fire({
-                title: 'Konfirmasi Hapus',
-                text: `Apakah Anda yakin ingin menghapus user "${userName}"? Tindakan ini tidak dapat dibatalkan!`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Ya, Hapus!',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    event.target.submit();
-                }
+    @push('scripts')
+        <!-- DataTables CSS & JS -->
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+        <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
+        <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+        <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+        <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+        <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
+
+        <script>
+            $(document).ready(function() {
+                // Initialize DataTable
+                var table = $('#usersTable').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    responsive: true,
+                    ajax: {
+                        url: "{{ route('users.index') }}",
+                        type: 'GET'
+                    },
+                    columns: [{
+                            data: 'DT_RowIndex',
+                            name: 'DT_RowIndex',
+                            orderable: false,
+                            searchable: false
+                        },
+                        {
+                            data: 'name',
+                            name: 'name'
+                        },
+                        {
+                            data: 'email',
+                            name: 'email'
+                        },
+                        {
+                            data: 'jabatan',
+                            name: 'jabatan'
+                        },
+                        {
+                            data: 'departemen_info',
+                            name: 'departemen_info',
+                            orderable: false,
+                            searchable: false
+                        },
+                        {
+                            data: 'role_badge',
+                            name: 'role'
+                        },
+                        {
+                            data: 'created_date',
+                            name: 'created_at'
+                        },
+                        {
+                            data: 'action',
+                            name: 'action',
+                            orderable: false,
+                            searchable: false
+                        }
+                    ],
+                    language: {
+                        processing: '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>',
+                        lengthMenu: "Tampilkan _MENU_ data per halaman",
+                        zeroRecords: "Tidak ada data yang ditemukan",
+                        info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                        infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
+                        infoFiltered: "(difilter dari _MAX_ total data)",
+                        search: "Cari:",
+                        paginate: {
+                            first: "Pertama",
+                            last: "Terakhir",
+                            next: "Selanjutnya",
+                            previous: "Sebelumnya"
+                        }
+                    },
+                    order: [
+                        [1, 'asc']
+                    ],
+                    pageLength: 10,
+                    lengthMenu: [
+                        [10, 25, 50, 100],
+                        [10, 25, 50, 100]
+                    ]
+                });
+
+                // Handle delete user
+                $('#usersTable').on('click', '.delete-user', function() {
+                    var id = $(this).data('id');
+
+                    Swal.fire({
+                        title: 'Konfirmasi Hapus',
+                        text: 'Apakah Anda yakin ingin menghapus user ini? Tindakan ini tidak dapat dibatalkan.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Ya, Hapus!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $.ajax({
+                                url: "{{ route('users.destroy', ':id') }}".replace(':id', id),
+                                type: 'DELETE',
+                                data: {
+                                    '_token': '{{ csrf_token() }}'
+                                },
+                                success: function(response) {
+                                    if (response.success) {
+                                        table.ajax.reload(null, false);
+                                        Swal.fire({
+                                            title: 'Berhasil!',
+                                            text: response.message,
+                                            icon: 'success',
+                                            toast: true,
+                                            position: 'top-end',
+                                            showConfirmButton: false,
+                                            timer: 3000
+                                        });
+                                    } else {
+                                        Swal.fire({
+                                            title: 'Error!',
+                                            text: response.message ||
+                                                'Terjadi kesalahan',
+                                            icon: 'error',
+                                            toast: true,
+                                            position: 'top-end',
+                                            showConfirmButton: false,
+                                            timer: 3000
+                                        });
+                                    }
+                                },
+                                error: function() {
+                                    Swal.fire({
+                                        title: 'Error!',
+                                        text: 'Terjadi kesalahan saat menghapus user',
+                                        icon: 'error',
+                                        toast: true,
+                                        position: 'top-end',
+                                        showConfirmButton: false,
+                                        timer: 3000
+                                    });
+                                }
+                            });
+                        }
+                    });
+                });
             });
-            
-            return false;
-        }
-    </script>
+        </script>
+    @endpush
 @endsection

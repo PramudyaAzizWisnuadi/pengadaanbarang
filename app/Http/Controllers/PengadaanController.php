@@ -50,6 +50,61 @@ class PengadaanController extends Controller
             }
         }
 
+        // If AJAX request for DataTables
+        if ($request->ajax()) {
+            $pengadaans = (clone $baseQuery)
+                ->with(['barangPengadaan'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            return \Yajra\DataTables\Facades\DataTables::of($pengadaans)
+                ->addIndexColumn()
+                ->addColumn('action', function ($pengadaan) {
+                    $btn = '<div class="btn-group btn-group-sm" role="group">';
+                    $btn .= '<a href="' . route('pengadaan.show', $pengadaan) . '" class="btn btn-outline-primary" title="Lihat Detail"><i class="bi bi-eye"></i></a>';
+
+                    if ($pengadaan->status === 'draft') {
+                        $btn .= '<a href="' . route('pengadaan.edit', $pengadaan) . '" class="btn btn-outline-warning" title="Edit"><i class="bi bi-pencil"></i></a>';
+                        $btn .= '<button type="button" class="btn btn-outline-danger delete-pengadaan" data-id="' . $pengadaan->id . '" title="Hapus"><i class="bi bi-trash"></i></button>';
+                    }
+
+                    if ($pengadaan->status === 'approved') {
+                        $btn .= '<a href="' . route('pengadaan.print', $pengadaan) . '" class="btn btn-outline-success" title="Print" target="_blank"><i class="bi bi-printer"></i></a>';
+                    }
+
+                    $btn .= '</div>';
+                    return $btn;
+                })
+                ->addColumn('status_badge', function ($pengadaan) {
+                    switch ($pengadaan->status) {
+                        case 'draft':
+                            return '<span class="status-badge status-draft">Draft</span>';
+                        case 'submitted':
+                            return '<span class="status-badge status-submitted">Submitted</span>';
+                        case 'approved':
+                            $skipIcon = $pengadaan->skip_approval ? '<i class="bi bi-lightning"></i> ' : '';
+                            return '<span class="status-badge status-approved">' . $skipIcon . 'Approved</span>';
+                        case 'rejected':
+                            return '<span class="status-badge status-rejected">Rejected</span>';
+                        case 'completed':
+                            return '<span class="status-badge status-completed">Completed</span>';
+                        default:
+                            return '<span class="badge bg-secondary">' . $pengadaan->status . '</span>';
+                    }
+                })
+                ->addColumn('jumlah_barang', function ($pengadaan) {
+                    return $pengadaan->barangPengadaan->sum('jumlah');
+                })
+                ->addColumn('tanggal_formatted', function ($pengadaan) {
+                    return $pengadaan->created_at->format('d/m/Y H:i');
+                })
+                ->addColumn('keterangan_limited', function ($pengadaan) {
+                    return \Illuminate\Support\Str::limit($pengadaan->keterangan ?? '', 30);
+                })
+                ->rawColumns(['action', 'status_badge'])
+                ->make(true);
+        }
+
         // Fetch pengadaan data for blade template
         $pengadaans = (clone $baseQuery)
             ->with(['barangPengadaan'])

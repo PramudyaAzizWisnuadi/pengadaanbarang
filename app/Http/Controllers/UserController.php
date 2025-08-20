@@ -27,53 +27,67 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        $this->checkSuperAdminAccess();
-
-        // If AJAX request for DataTables
         if ($request->ajax()) {
-            $users = User::with('departemenRelation')->latest()->get();
+            $query = User::with('departemenRelation');
 
-            return DataTables::of($users)
+            // Super admin bisa lihat semua user
+            if (Auth::user()->role !== 'super_admin') {
+                // Admin dan user hanya bisa lihat user di departemen yang sama
+                $query->where('departemen', Auth::user()->departemen);
+            }
+
+            return datatables($query)
                 ->addIndexColumn()
-                ->addColumn('action', function ($user) {
-                    $btn = '<div class="btn-group btn-group-sm" role="group">';
-                    $btn .= '<a href="' . route('users.show', $user) . '" class="btn btn-outline-info"><i class="bi bi-eye"></i></a>';
-                    $btn .= '<a href="' . route('users.edit', $user) . '" class="btn btn-outline-warning"><i class="bi bi-pencil"></i></a>';
-
-                    if ($user->id !== Auth::id()) {
-                        $btn .= '<button type="button" class="btn btn-outline-danger delete-user" data-id="' . $user->id . '" title="Hapus"><i class="bi bi-trash"></i></button>';
-                    }
-
-                    $btn .= '</div>';
-                    return $btn;
-                })
                 ->addColumn('departemen_info', function ($user) {
-                    // Jika ada relationship departemen yang dimuat dan departemen_id ada
-                    if ($user->departemen_id && $user->relationLoaded('departemenRelation') && $user->departemenRelation) {
-                        return '<span class="badge bg-primary">' . $user->departemenRelation->kode_departemen . '</span><br><small>' . $user->departemenRelation->nama_departemen . '</small>';
+                    if ($user->departemenRelation) {
+                        return '<span class="badge bg-primary">' . $user->departemenRelation->kode_departemen . '</span><br>' .
+                            '<small>' . $user->departemenRelation->nama_departemen . '</small>';
+                    } else {
+                        return '<span class="badge bg-secondary">-</span><br>' .
+                            '<small>' . ($user->departemen ?? 'Tidak ada departemen') . '</small>';
                     }
-                    // Jika hanya ada string departemen (data lama)
-                    elseif (!empty($user->getAttributes()['departemen'])) {
-                        return '<span class="badge bg-secondary">-</span><br><small>' . $user->getAttributes()['departemen'] . '</small>';
-                    }
-                    return '<span class="badge bg-secondary">-</span><br><small>Tidak ada departemen</small>';
                 })
-                ->addColumn('is_current_user', function ($user) {
-                    if ($user->id === Auth::id()) {
-                        return '<span class="badge bg-info">Anda</span>';
+                ->addColumn('role_badge', function ($user) {
+                    if ($user->role === 'super_admin') {
+                        return '<span class="badge bg-danger">Super Admin</span>';
+                    } elseif ($user->role === 'admin') {
+                        return '<span class="badge bg-warning">Admin</span>';
+                    } else {
+                        return '<span class="badge bg-success">User</span>';
                     }
-                    return '';
                 })
                 ->addColumn('created_date', function ($user) {
-                    return $user->created_at->format('d/m/Y H:i');
+                    return $user->created_at->format('d/m/Y');
                 })
-                ->rawColumns(['action', 'departemen_info', 'is_current_user'])
+                ->addColumn('action', function ($user) {
+                    $actions = '<div class="btn-group btn-group-sm" role="group">';
+
+                    $actions .= '<a href="' . route('users.show', $user->id) . '" class="btn btn-outline-info" title="Lihat">
+                                    <i class="bi bi-eye"></i>
+                                </a>';
+
+                    $actions .= '<a href="' . route('users.edit', $user->id) . '" class="btn btn-outline-warning" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>';
+
+                    // Jangan tampilkan tombol hapus untuk user sendiri
+                    if ($user->id !== Auth::id()) {
+                        $actions .= '<button type="button" class="btn btn-outline-danger delete-user"
+                                            data-id="' . $user->id . '" title="Hapus">
+                                        <i class="bi bi-trash"></i>
+                                    </button>';
+                    }
+
+                    $actions .= '</div>';
+
+                    return $actions;
+                })
+                ->rawColumns(['departemen_info', 'role_badge', 'action'])
                 ->make(true);
         }
 
-        // Regular view request - load users directly
-        $users = User::with('departemenRelation')->latest()->get();
-        return view('users.index', compact('users'));
+        // Return view for non-AJAX requests
+        return view('users.index');
     }
 
     /**

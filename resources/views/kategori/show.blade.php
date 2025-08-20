@@ -215,7 +215,7 @@
     <script>
         function confirmDeleteKategori(event, namaKategori) {
             event.preventDefault();
-            
+
             Swal.fire({
                 title: 'Konfirmasi Hapus',
                 text: `Apakah Anda yakin ingin menghapus kategori "${namaKategori}"? Tindakan ini tidak dapat dibatalkan!`,
@@ -230,7 +230,7 @@
                     event.target.submit();
                 }
             });
-            
+
             return false;
         }
     </script>

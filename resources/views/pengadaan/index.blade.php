@@ -214,97 +214,181 @@
         @endif
 
         <div class="card-body">
-            @if ($pengadaans->count() > 0)
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead class="table-light">
-                            <tr>
-                                <th>No</th>
-                                <th>Kode Pengadaan</th>
-                                <th>Pemohon</th>
-                                <th>Departemen</th>
-                                <th>Tanggal</th>
-                                <th>Jumlah Barang</th>
-                                <th>Keperluan</th>
-                                <th>Status</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($pengadaans as $index => $pengadaan)
-                                <tr>
-                                    <td>{{ $index + 1 }}</td>
-                                    <td>{{ $pengadaan->kode_pengadaan }}</td>
-                                    <td>{{ $pengadaan->nama_pemohon }}</td>
-                                    <td>{{ $pengadaan->departemen }}</td>
-                                    <td>{{ $pengadaan->created_at->format('d/m/Y H:i') }}</td>
-                                    <td>{{ $pengadaan->barangPengadaan->sum('jumlah') }}</td>
-                                    <td>{{ Str::limit($pengadaan->keterangan ?? '', 30) }}</td>
-                                    <td>
-                                        @switch($pengadaan->status)
-                                            @case('draft')
-                                                <span class="status-badge status-draft">Draft</span>
-                                            @break
-
-                                            @case('submitted')
-                                                <span class="status-badge status-submitted">Submitted</span>
-                                            @break
-
-                                            @case('approved')
-                                                <span class="status-badge status-approved">
-                                                    @if ($pengadaan->skip_approval)
-                                                        <i class="bi bi-lightning"></i>
-                                                    @endif
-                                                    Approved
-                                                </span>
-                                            @break
-
-                                            @case('rejected')
-                                                <span class="status-badge status-rejected">Rejected</span>
-                                            @break
-
-                                            @case('completed')
-                                                <span class="status-badge status-completed">Completed</span>
-                                            @break
-
-                                            @default
-                                                <span class="badge bg-secondary">{{ $pengadaan->status }}</span>
-                                        @endswitch
-                                    </td>
-                                    <td>
-                                        <div class="btn-group btn-group-sm" role="group">
-                                            <a href="{{ route('pengadaan.show', $pengadaan) }}"
-                                                class="btn btn-outline-primary" title="Lihat Detail">
-                                                <i class="bi bi-eye"></i>
-                                            </a>
-
-                                            @if ($pengadaan->status === 'draft')
-                                                <a href="{{ route('pengadaan.edit', $pengadaan) }}"
-                                                    class="btn btn-outline-warning" title="Edit">
-                                                    <i class="bi bi-pencil"></i>
-                                                </a>
-                                            @endif
-
-                                            @if ($pengadaan->status === 'approved')
-                                                <a href="{{ route('pengadaan.print', $pengadaan) }}"
-                                                    class="btn btn-outline-success" title="Print" target="_blank">
-                                                    <i class="bi bi-printer"></i>
-                                                </a>
-                                            @endif
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            @else
-                <div class="text-center py-5">
-                    <i class="bi bi-inbox display-1 text-muted"></i>
-                    <h5 class="mt-3 text-muted">Belum ada data pengadaan</h5>
-                    <p class="text-muted">Silakan buat pengadaan baru untuk memulai.</p>
-                </div>
-            @endif
+            <div class="table-responsive">
+                <table class="table table-hover" id="pengadaanTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>No</th>
+                            <th>Kode Pengadaan</th>
+                            <th>Pemohon</th>
+                            <th>Departemen</th>
+                            <th>Tanggal</th>
+                            <th>Jumlah Barang</th>
+                            <th>Keperluan</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data will be loaded via AJAX -->
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
+
+    @push('scripts')
+        <!-- DataTables CSS & JS -->
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+        <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
+        <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+        <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+        <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+        <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
+
+        <script>
+            $(document).ready(function() {
+                // Initialize DataTable
+                var table = $('#pengadaanTable').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    responsive: true,
+                    ajax: {
+                        url: "{{ route('pengadaan.index') }}",
+                        type: 'GET'
+                    },
+                    columns: [{
+                            data: 'DT_RowIndex',
+                            name: 'DT_RowIndex',
+                            orderable: false,
+                            searchable: false
+                        },
+                        {
+                            data: 'kode_pengadaan',
+                            name: 'kode_pengadaan'
+                        },
+                        {
+                            data: 'nama_pemohon',
+                            name: 'nama_pemohon'
+                        },
+                        {
+                            data: 'departemen',
+                            name: 'departemen'
+                        },
+                        {
+                            data: 'tanggal_formatted',
+                            name: 'created_at'
+                        },
+                        {
+                            data: 'jumlah_barang',
+                            name: 'jumlah_barang',
+                            orderable: false,
+                            searchable: false
+                        },
+                        {
+                            data: 'keterangan_limited',
+                            name: 'keterangan'
+                        },
+                        {
+                            data: 'status_badge',
+                            name: 'status'
+                        },
+                        {
+                            data: 'action',
+                            name: 'action',
+                            orderable: false,
+                            searchable: false
+                        }
+                    ],
+                    language: {
+                        processing: '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>',
+                        lengthMenu: "Tampilkan _MENU_ data per halaman",
+                        zeroRecords: "Tidak ada data yang ditemukan",
+                        info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                        infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
+                        infoFiltered: "(difilter dari _MAX_ total data)",
+                        search: "Cari:",
+                        paginate: {
+                            first: "Pertama",
+                            last: "Terakhir",
+                            next: "Selanjutnya",
+                            previous: "Sebelumnya"
+                        }
+                    },
+                    order: [
+                        [1, 'desc']
+                    ],
+                    pageLength: 10,
+                    lengthMenu: [
+                        [10, 25, 50, 100],
+                        [10, 25, 50, 100]
+                    ]
+                });
+
+                // Handle delete pengadaan
+                $('#pengadaanTable').on('click', '.delete-pengadaan', function() {
+                    var id = $(this).data('id');
+
+                    Swal.fire({
+                        title: 'Konfirmasi Hapus',
+                        text: 'Apakah Anda yakin ingin menghapus pengadaan ini? Tindakan ini tidak dapat dibatalkan.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Ya, Hapus!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $.ajax({
+                                url: "{{ route('pengadaan.destroy', ':id') }}".replace(':id',
+                                    id),
+                                type: 'DELETE',
+                                data: {
+                                    '_token': '{{ csrf_token() }}'
+                                },
+                                success: function(response) {
+                                    if (response.success) {
+                                        table.ajax.reload(null, false);
+                                        Swal.fire({
+                                            title: 'Berhasil!',
+                                            text: response.message,
+                                            icon: 'success',
+                                            toast: true,
+                                            position: 'top-end',
+                                            showConfirmButton: false,
+                                            timer: 3000
+                                        });
+                                    } else {
+                                        Swal.fire({
+                                            title: 'Error!',
+                                            text: response.message ||
+                                                'Terjadi kesalahan',
+                                            icon: 'error',
+                                            toast: true,
+                                            position: 'top-end',
+                                            showConfirmButton: false,
+                                            timer: 3000
+                                        });
+                                    }
+                                },
+                                error: function() {
+                                    Swal.fire({
+                                        title: 'Error!',
+                                        text: 'Terjadi kesalahan saat menghapus pengadaan',
+                                        icon: 'error',
+                                        toast: true,
+                                        position: 'top-end',
+                                        showConfirmButton: false,
+                                        timer: 3000
+                                    });
+                                }
+                            });
+                        }
+                    });
+                });
+            });
+        </script>
+    @endpush
 @endsection

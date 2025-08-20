@@ -248,7 +248,7 @@ class KategoriController extends Controller
     public function getKategoriByDepartemen($departemenName)
     {
         $departemen = \App\Models\Departemen::where('nama_departemen', $departemenName)->first();
-        
+
         if (!$departemen) {
             return response()->json([]);
         }
