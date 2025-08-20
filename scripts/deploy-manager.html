@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production Deployment Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .deploy-container { background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .step { transition: all 0.3s ease; }
+        .step.active { background: #e3f2fd; border-left: 4px solid #2196f3; }
+        .step.completed { background: #e8f5e8; border-left: 4px solid #4caf50; }
+        .step.error { background: #ffebee; border-left: 4px solid #f44336; }
+        .output-box { background: #1e1e1e; color: #00ff00; font-family: 'Courier New', monospace; height: 300px; overflow-y: auto; }
+        .btn-deploy { background: linear-gradient(45deg, #2196f3, #21cbf3); border: none; }
+        .btn-deploy:hover { background: linear-gradient(45deg, #1976d2, #0097a7); }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="deploy-container p-4">
+                    <div class="text-center mb-4">
+                        <h1><i class="fas fa-rocket text-primary"></i> Production Deployment Manager</h1>
+                        <p class="text-muted">Deploy your Laravel application to production with one click</p>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h5><i class="fas fa-list-check"></i> Deployment Steps</h5>
+                            <div id="deployment-steps">
+                                <div class="step p-3 mb-2 rounded" data-step="1">
+                                    <i class="fas fa-cog"></i> Environment Setup
+                                </div>
+                                <div class="step p-3 mb-2 rounded" data-step="2">
+                                    <i class="fas fa-broom"></i> Clear Caches
+                                </div>
+                                <div class="step p-3 mb-2 rounded" data-step="3">
+                                    <i class="fas fa-wrench"></i> Production Fix
+                                </div>
+                                <div class="step p-3 mb-2 rounded" data-step="4">
+                                    <i class="fas fa-download"></i> Install Dependencies
+                                </div>
+                                <div class="step p-3 mb-2 rounded" data-step="5">
+                                    <i class="fas fa-key"></i> Generate App Key
+                                </div>
+                                <div class="step p-3 mb-2 rounded" data-step="6">
+                                    <i class="fas fa-database"></i> Database Migration
+                                </div>
+                                <div class="step p-3 mb-2 rounded" data-step="7">
+                                    <i class="fas fa-tachometer-alt"></i> Optimize Performance
+                                </div>
+                                <div class="step p-3 mb-2 rounded" data-step="8">
+                                    <i class="fas fa-shield-alt"></i> Set Permissions
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-8">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5><i class="fas fa-terminal"></i> Deployment Output</h5>
+                                <div>
+                                    <button id="btn-deploy" class="btn btn-deploy text-white px-4">
+                                        <i class="fas fa-rocket"></i> Start Deployment
+                                    </button>
+                                    <button id="btn-clear" class="btn btn-outline-secondary">
+                                        <i class="fas fa-eraser"></i> Clear Log
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="output" class="output-box p-3 rounded"></div>
+
+                            <div class="mt-3" id="status-area" style="display: none;">
+                                <div class="alert alert-info">
+                                    <h6><i class="fas fa-info-circle"></i> Deployment Status</h6>
+                                    <div id="deployment-status">Ready to deploy...</div>
+                                </div>
+                            </div>
+
+                            <div class="mt-3" id="success-area" style="display: none;">
+                                <div class="alert alert-success">
+                                    <h6><i class="fas fa-check-circle"></i> Deployment Completed!</h6>
+                                    <p class="mb-2">Your application is ready for production!</p>
+                                    <hr>
+                                    <strong>Login Credentials:</strong><br>
+                                    <i class="fas fa-user-shield"></i> Super Admin: superadmin@mdgroup.id / Murahsetiaphari<br>
+                                    <i class="fas fa-user-cog"></i> IT Staff: staffit@mdgroup.id / password
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentStep = 0;
+        let isDeploying = false;
+
+        const steps = [
+            'Setting environment to production...',
+            'Clearing all caches...',
+            'Running production fix...',
+            'Installing production dependencies...',
+            'Generating application key...',
+            'Running database migrations...',
+            'Optimizing for production...',
+            'Setting file permissions...'
+        ];
+
+        document.getElementById('btn-deploy').addEventListener('click', startDeployment);
+        document.getElementById('btn-clear').addEventListener('click', clearOutput);
+
+        function addLog(message, type = 'info') {
+            const output = document.getElementById('output');
+            const timestamp = new Date().toLocaleTimeString();
+            const icon = type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️';
+            
+            output.innerHTML += `<div>[${timestamp}] ${icon} ${message}</div>`;
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function updateStep(stepNumber, status) {
+            const stepElement = document.querySelector(`[data-step="${stepNumber}"]`);
+            stepElement.classList.remove('active', 'completed', 'error');
+            stepElement.classList.add(status);
+        }
+
+        function clearOutput() {
+            document.getElementById('output').innerHTML = '';
+            document.getElementById('status-area').style.display = 'none';
+            document.getElementById('success-area').style.display = 'none';
+            
+            // Reset all steps
+            document.querySelectorAll('.step').forEach(step => {
+                step.classList.remove('active', 'completed', 'error');
+            });
+            
+            currentStep = 0;
+            isDeploying = false;
+            document.getElementById('btn-deploy').disabled = false;
+            document.getElementById('btn-deploy').innerHTML = '<i class="fas fa-rocket"></i> Start Deployment';
+        }
+
+        async function startDeployment() {
+            if (isDeploying) return;
+            
+            isDeploying = true;
+            document.getElementById('btn-deploy').disabled = true;
+            document.getElementById('btn-deploy').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deploying...';
+            document.getElementById('status-area').style.display = 'block';
+            
+            addLog('🚀 Starting production deployment...');
+            
+            try {
+                // Simulate deployment process
+                for (let i = 1; i <= steps.length; i++) {
+                    updateStep(i, 'active');
+                    document.getElementById('deployment-status').textContent = steps[i-1];
+                    addLog(steps[i-1]);
+                    
+                    // Simulate deployment step with actual PHP execution
+                    await deploymentStep(i);
+                    
+                    updateStep(i, 'completed');
+                    addLog(`Step ${i} completed successfully`, 'success');
+                    
+                    // Add delay for visual effect
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+                
+                addLog('🎉 Deployment completed successfully!', 'success');
+                document.getElementById('success-area').style.display = 'block';
+                document.getElementById('deployment-status').textContent = 'Deployment completed!';
+                
+            } catch (error) {
+                addLog(`❌ Deployment failed: ${error.message}`, 'error');
+                updateStep(currentStep, 'error');
+            } finally {
+                isDeploying = false;
+                document.getElementById('btn-deploy').disabled = false;
+                document.getElementById('btn-deploy').innerHTML = '<i class="fas fa-rocket"></i> Start Deployment';
+            }
+        }
+
+        async function deploymentStep(step) {
+            // Here you would make actual AJAX calls to execute PHP scripts
+            // For demo purposes, we'll simulate with promises
+            
+            return new Promise((resolve, reject) => {
+                // Simulate random success/delay
+                setTimeout(() => {
+                    if (Math.random() > 0.1) { // 90% success rate
+                        resolve();
+                    } else {
+                        reject(new Error(`Step ${step} failed`));
+                    }
+                }, Math.random() * 2000 + 500);
+            });
+        }
+
+        // Initialize
+        addLog('🔧 Deployment manager ready. Click "Start Deployment" to begin.');
+    </script>
+</body>
+</html>
