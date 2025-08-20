@@ -75,7 +75,7 @@ class PengadaanExport implements FromCollection, WithHeadings, WithMapping, With
             $row->nama_pemohon,
             $row->jabatan,
             $row->departemen,
-            $row->alasan_pengadaan,
+            $row->keterangan,
             $row->total_estimasi,
             ucfirst($row->status),
             $row->tanggal_approval ? \Carbon\Carbon::parse($row->tanggal_approval)->format('d/m/Y') : '-',
