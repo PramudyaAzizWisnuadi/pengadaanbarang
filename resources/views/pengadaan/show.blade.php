@@ -103,6 +103,35 @@
                         </div>
                     @endif
 
+                    <!-- Catatan Penyelesaian -->
+                    @if ($pengadaan->status === 'completed' && $pengadaan->catatan_penyelesaian)
+                        <div class="mb-4">
+                            <h6 class="border-bottom pb-2">Informasi Penyelesaian</h6>
+                            <div class="alert alert-success">
+                                <div class="d-flex align-items-start">
+                                    <i class="bi bi-check-circle-fill text-success me-2 mt-1"></i>
+                                    <div class="flex-grow-1">
+                                        <p class="mb-2">{{ $pengadaan->catatan_penyelesaian }}</p>
+                                        @if ($pengadaan->tanggal_selesai)
+                                            <small class="text-muted">
+                                                <strong>Diselesaikan pada:</strong> {{ $pengadaan->tanggal_selesai->format('d/m/Y H:i') }}
+                                            </small>
+                                        @endif
+                                        @if ($pengadaan->foto_penyelesaian)
+                                            <div class="mt-2">
+                                                <button type="button" class="btn btn-sm btn-outline-success"
+                                                    onclick="showImage('{{ asset('storage/' . $pengadaan->foto_penyelesaian) }}', 'Foto Penyelesaian - {{ $pengadaan->kode_pengadaan }}')">
+                                                    <i class="bi bi-image me-1"></i>
+                                                    Lihat Foto Penyelesaian
+                                                </button>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
                     <!-- Daftar Barang -->
                     <div class="mb-4">
                         <h6 class="border-bottom pb-2">Daftar Barang yang Diminta</h6>
@@ -211,15 +240,12 @@
                             </button>
                         @endif
 
-                        @if ($pengadaan->status === 'approved' && in_array(Auth::user()->role, ['admin', 'super_admin']))
-                            <form action="{{ route('pengadaan.complete', $pengadaan) }}" method="POST"
-                                onsubmit="return confirmComplete(event)">
-                                @csrf
-                                <button type="submit" class="btn btn-success w-100">
-                                    <i class="bi bi-check2-all me-1"></i>
-                                    Selesaikan Pengadaan
-                                </button>
-                            </form>
+                        @if ($pengadaan->status === 'approved' && (in_array(Auth::user()->role, ['admin', 'super_admin']) || Auth::user()->id === $pengadaan->user_id))
+                            <button type="button" class="btn btn-success" data-bs-toggle="modal"
+                                data-bs-target="#completeModal">
+                                <i class="bi bi-check2-all me-1"></i>
+                                Selesaikan Pengadaan
+                            </button>
                         @endif
 
                         <a href="{{ route('pengadaan.print', $pengadaan) }}" target="_blank"
@@ -294,6 +320,24 @@
                                 </div>
                             </div>
                         @endif
+
+                        @if ($pengadaan->status === 'completed' && $pengadaan->tanggal_selesai)
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-primary"></div>
+                                <div class="timeline-content">
+                                    <h6 class="mb-1">
+                                        <i class="bi bi-check-circle-fill text-primary"></i> Pengadaan Selesai
+                                    </h6>
+                                    <p class="text-muted mb-0">{{ $pengadaan->tanggal_selesai->format('d/m/Y H:i') }}</p>
+                                    <small class="text-muted">Oleh: {{ $pengadaan->user->name }}</small>
+                                    @if ($pengadaan->catatan_penyelesaian)
+                                        <br><small class="text-muted">
+                                            <i class="bi bi-chat-quote"></i> {{ Str::limit($pengadaan->catatan_penyelesaian, 50) }}
+                                        </small>
+                                    @endif
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -315,13 +359,13 @@
                         <p>Yakin ingin menyetujui pengadaan <strong>{{ $pengadaan->kode_pengadaan }}</strong>?</p>
 
                         <div class="mb-3">
-                            <label for="foto_approval" class="form-label">Upload Foto Printout yang Sudah Disetujui <span
-                                    class="text-danger">*</span></label>
+                            <label for="foto_approval" class="form-label">Upload Foto Printout yang Sudah Disetujui 
+                                <span class="text-muted">(Opsional)</span></label>
                             <input type="file" class="form-control" id="foto_approval" name="foto_approval"
-                                accept="image/jpeg,image/png,image/jpg" required>
+                                accept="image/jpeg,image/png,image/jpg">
                             <small class="text-muted">
                                 <i class="bi bi-info-circle"></i>
-                                Upload foto dokumen yang sudah ditandatangani. Gambar akan dikompres otomatis maksimal
+                                Upload foto dokumen yang sudah ditandatangani (opsional). Gambar akan dikompres otomatis maksimal
                                 500KB.
                             </small>
                             <div class="mt-2">
@@ -406,11 +450,11 @@
                                 mendadak untuk proyek urgent, dll.</small>
                         </div>
                         <div class="mb-3">
-                            <label for="foto_bypass" class="form-label">Foto Dokumen yang Telah Disetujui <span
-                                    class="text-danger">*</span></label>
+                            <label for="foto_bypass" class="form-label">Foto Dokumen yang Telah Disetujui 
+                                <span class="text-muted">(Opsional)</span></label>
                             <input type="file" class="form-control" id="foto_bypass" name="foto_approval"
-                                accept="image/jpeg,image/png,image/jpg" required onchange="previewBypassImage(this)">
-                            <small class="text-muted">Upload foto printout dokumen yang telah disetujui. Foto akan otomatis
+                                accept="image/jpeg,image/png,image/jpg" onchange="previewBypassImage(this)">
+                            <small class="text-muted">Upload foto printout dokumen yang telah disetujui (opsional). Foto akan otomatis
                                 dikompres menjadi 500KB.</small>
                             <div id="bypassImagePreview" class="mt-2" style="display: none;">
                                 <img id="bypassPreviewImg" src="" alt="Preview" class="img-thumbnail"
@@ -423,6 +467,48 @@
                         <button type="submit" class="btn btn-warning">
                             <i class="bi bi-lightning me-1"></i>
                             Ya, Bypass Approval
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Complete Modal -->
+    <div class="modal fade" id="completeModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="{{ route('pengadaan.complete', $pengadaan) }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title">Selesaikan Pengadaan</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Mohon berikan catatan dan foto (opsional) sebagai bukti penyelesaian pengadaan.
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="catatan_penyelesaian" class="form-label">Catatan Penyelesaian <span class="text-danger">*</span></label>
+                            <textarea name="catatan_penyelesaian" id="catatan_penyelesaian" class="form-control" rows="4" 
+                                placeholder="Jelaskan status penyelesaian pengadaan..." required></textarea>
+                            <div class="form-text">Contoh: "Barang telah diterima sesuai spesifikasi dan dalam kondisi baik"</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="foto_penyelesaian" class="form-label">Foto Bukti Penyelesaian (Opsional)</label>
+                            <input type="file" name="foto_penyelesaian" id="foto_penyelesaian" class="form-control" 
+                                accept="image/*">
+                            <div class="form-text">Format: JPG, PNG. Maksimal 2MB</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check2-all me-1"></i>
+                            Selesaikan Pengadaan
                         </button>
                     </div>
                 </form>
@@ -540,26 +626,6 @@
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
                 confirmButtonText: 'Ya, Submit!',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    event.target.submit();
-                }
-            });
-            return false;
-        }
-
-        function confirmComplete(event) {
-            event.preventDefault();
-
-            Swal.fire({
-                title: 'Konfirmasi Penyelesaian',
-                text: 'Yakin ingin menyelesaikan pengadaan ini? Status akan berubah menjadi Completed.',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#28a745',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Ya, Selesaikan!',
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {

@@ -334,7 +334,7 @@ class PengadaanController extends Controller
 
         $request->validate([
             'catatan_approval' => 'nullable|string|max:1000',
-            'foto_approval' => 'required|image|mimes:jpeg,png,jpg|max:10240' // Max 10MB before compression
+            'foto_approval' => 'nullable|image|mimes:jpeg,png,jpg|max:10240' // Max 10MB before compression
         ]);
 
         if ($pengadaan->status !== 'submitted') {
@@ -342,18 +342,27 @@ class PengadaanController extends Controller
                 ->with('error', 'Pengadaan tidak dalam status submitted');
         }
 
-        // Compress and save photo
-        $imageService = new \App\Services\ImageCompressionService();
-        $fotoPath = $imageService->compressImage($request->file('foto_approval'));
+        // Compress and save photo if provided
+        $fotoPath = null;
+        if ($request->hasFile('foto_approval')) {
+            $imageService = new \App\Services\ImageCompressionService();
+            $fotoPath = $imageService->compressImage($request->file('foto_approval'));
+        }
 
         $oldStatus = $pengadaan->status;
-        $pengadaan->update([
+        $updateData = [
             'status' => 'approved',
             'approved_by' => Auth::id(),
             'tanggal_approval' => now(),
             'catatan_approval' => $request->catatan_approval,
-            'foto_approval' => $fotoPath
-        ]);
+        ];
+
+        // Only update foto_approval if a file was uploaded
+        if ($fotoPath) {
+            $updateData['foto_approval'] = $fotoPath;
+        }
+
+        $pengadaan->update($updateData);
 
         // Send notification feedback to requester
         $this->notificationService->notifyRequesterOnStatusUpdate($pengadaan, $oldStatus, 'approved');
@@ -396,22 +405,65 @@ class PengadaanController extends Controller
     /**
      * Complete pengadaan (mark as completed)
      */
-    public function complete(PengadaanBarang $pengadaan)
+    public function complete(Request $request, PengadaanBarang $pengadaan)
     {
-        // Check if user has permission to complete
         $currentUser = Auth::user();
-        if (!$currentUser || !in_array($currentUser->role, ['admin', 'super_admin'])) {
-            return redirect()->route('pengadaan.show', $pengadaan)
-                ->with('error', 'Anda tidak memiliki izin untuk menyelesaikan pengadaan');
+        
+        // Check permissions: admin/super_admin can complete any, user can complete their own
+        if ($currentUser->role === 'user') {
+            // User can only complete their own approved pengadaan
+            if ($pengadaan->user_id !== $currentUser->id) {
+                return redirect()->route('pengadaan.show', $pengadaan)
+                    ->with('error', 'Anda hanya dapat menyelesaikan pengadaan yang Anda ajukan sendiri');
+            }
+            
+            // Check if pengadaan is approved
+            if ($pengadaan->status !== 'approved') {
+                return redirect()->route('pengadaan.show', $pengadaan)
+                    ->with('error', 'Pengadaan harus diapprove terlebih dahulu sebelum dapat diselesaikan');
+            }
+        } else {
+            // Admin/super admin permissions
+            if (!in_array($currentUser->role, ['admin', 'super_admin'])) {
+                return redirect()->route('pengadaan.show', $pengadaan)
+                    ->with('error', 'Anda tidak memiliki izin untuk menyelesaikan pengadaan');
+            }
+            
+            // Admin: Jika skip approval, tidak perlu status approved
+            if (!$pengadaan->skip_approval && $pengadaan->status !== 'approved') {
+                return redirect()->route('pengadaan.show', $pengadaan)
+                    ->with('error', 'Pengadaan harus diapprove terlebih dahulu');
+            }
         }
 
-        // Jika skip approval, tidak perlu status approved
-        if (!$pengadaan->skip_approval && $pengadaan->status !== 'approved') {
-            return redirect()->route('pengadaan.show', $pengadaan)
-                ->with('error', 'Pengadaan harus diapprove terlebih dahulu');
-        }
+        // Validate input for user completion (admin can complete without additional info)
+        if ($currentUser->role === 'user') {
+            $request->validate([
+                'catatan_penyelesaian' => 'required|string|max:1000',
+                'foto_penyelesaian' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
+            ]);
 
-        $pengadaan->update(['status' => 'completed']);
+            $data = [
+                'status' => 'completed',
+                'tanggal_selesai' => now(),
+                'catatan_penyelesaian' => $request->catatan_penyelesaian
+            ];
+
+            // Handle foto penyelesaian upload
+            if ($request->hasFile('foto_penyelesaian')) {
+                $imageService = new \App\Services\ImageCompressionService();
+                $fotoPath = $imageService->compressImage($request->file('foto_penyelesaian'));
+                $data['foto_penyelesaian'] = $fotoPath;
+            }
+
+            $pengadaan->update($data);
+        } else {
+            // Simple completion for admin
+            $pengadaan->update([
+                'status' => 'completed',
+                'tanggal_selesai' => now()
+            ]);
+        }
 
         return redirect()->route('pengadaan.show', $pengadaan)
             ->with('success', 'Pengadaan berhasil diselesaikan');
@@ -431,7 +483,7 @@ class PengadaanController extends Controller
 
         $request->validate([
             'alasan_skip_approval' => 'required|string|max:500',
-            'foto_approval' => 'required|image|mimes:jpeg,png,jpg|max:10240' // Max 10MB before compression
+            'foto_approval' => 'nullable|image|mimes:jpeg,png,jpg|max:10240' // Max 10MB before compression
         ]);
 
         if ($pengadaan->status !== 'submitted') {
@@ -439,19 +491,28 @@ class PengadaanController extends Controller
                 ->with('error', 'Pengadaan harus dalam status submitted');
         }
 
-        // Compress and save photo
-        $imageService = new \App\Services\ImageCompressionService();
-        $fotoPath = $imageService->compressImage($request->file('foto_approval'));
+        // Compress and save photo if provided
+        $fotoPath = null;
+        if ($request->hasFile('foto_approval')) {
+            $imageService = new \App\Services\ImageCompressionService();
+            $fotoPath = $imageService->compressImage($request->file('foto_approval'));
+        }
 
-        $pengadaan->update([
+        $updateData = [
             'status' => 'approved',
             'skip_approval' => true,
             'alasan_skip_approval' => $request->alasan_skip_approval,
             'approved_by' => Auth::id(),
             'tanggal_approval' => now(),
             'catatan_approval' => 'Disetujui tanpa approval formal: ' . $request->alasan_skip_approval,
-            'foto_approval' => $fotoPath
-        ]);
+        ];
+
+        // Only update foto_approval if a file was uploaded
+        if ($fotoPath) {
+            $updateData['foto_approval'] = $fotoPath;
+        }
+
+        $pengadaan->update($updateData);
 
         return redirect()->route('pengadaan.show', $pengadaan)
             ->with('success', 'Pengadaan berhasil disetujui tanpa approval formal');

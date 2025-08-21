@@ -26,13 +26,17 @@ class PengadaanBarang extends Model
         'catatan_approval',
         'foto_approval',
         'file_ttd_atasan',
-        'departemen_id'
+        'departemen_id',
+        'tanggal_selesai',
+        'catatan_penyelesaian',
+        'foto_penyelesaian'
     ];
 
     protected $casts = [
         'tanggal_pengajuan' => 'date',
         'tanggal_dibutuhkan' => 'date',
         'tanggal_approval' => 'datetime',
+        'tanggal_selesai' => 'datetime',
         'total_estimasi' => 'decimal:2',
         'skip_approval' => 'boolean'
     ];
