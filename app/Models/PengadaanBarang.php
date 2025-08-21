@@ -14,7 +14,7 @@ class PengadaanBarang extends Model
         'nama_pemohon',
         'jabatan',
         'departemen',
-        'alasan_pengadaan',
+        'keterangan',
         'total_estimasi',
         'status',
         'skip_approval',
@@ -25,7 +25,8 @@ class PengadaanBarang extends Model
         'approved_by',
         'catatan_approval',
         'foto_approval',
-        'file_ttd_atasan'
+        'file_ttd_atasan',
+        'departemen_id'
     ];
 
     protected $casts = [
