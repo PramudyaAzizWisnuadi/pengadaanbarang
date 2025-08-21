@@ -191,7 +191,7 @@
                             </form>
                         @endif
 
-                        @if ($pengadaan->status === 'submitted')
+                        @if ($pengadaan->status === 'submitted' && in_array(Auth::user()->role, ['admin', 'super_admin']))
                             <button type="button" class="btn btn-success" data-bs-toggle="modal"
                                 data-bs-target="#approveModal">
                                 <i class="bi bi-check-circle me-1"></i>
@@ -211,7 +211,7 @@
                             </button>
                         @endif
 
-                        @if ($pengadaan->status === 'approved')
+                        @if ($pengadaan->status === 'approved' && in_array(Auth::user()->role, ['admin', 'super_admin']))
                             <form action="{{ route('pengadaan.complete', $pengadaan) }}" method="POST"
                                 onsubmit="return confirmComplete(event)">
                                 @csrf
@@ -531,7 +531,7 @@
         // SweetAlert confirmations
         function confirmSubmit(event) {
             event.preventDefault();
-            
+
             Swal.fire({
                 title: 'Konfirmasi Submit',
                 text: 'Yakin ingin submit pengadaan ini? Setelah disubmit tidak dapat diedit lagi.',
@@ -551,7 +551,7 @@
 
         function confirmComplete(event) {
             event.preventDefault();
-            
+
             Swal.fire({
                 title: 'Konfirmasi Penyelesaian',
                 text: 'Yakin ingin menyelesaikan pengadaan ini? Status akan berubah menjadi Completed.',

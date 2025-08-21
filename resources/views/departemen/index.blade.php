@@ -91,25 +91,25 @@
 @endsection
 
 @push('scripts')
-<script>
-    function confirmDeleteDepartemen(event, departemenName) {
-        event.preventDefault();
+    <script>
+        function confirmDeleteDepartemen(event, departemenName) {
+            event.preventDefault();
 
-        Swal.fire({
-            title: 'Konfirmasi Hapus',
-            text: `Apakah Anda yakin ingin menghapus departemen "${departemenName}"?`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Ya, Hapus!',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                event.target.submit();
-            }
-        });
-        return false;
-    }
-</script>
+            Swal.fire({
+                title: 'Konfirmasi Hapus',
+                text: `Apakah Anda yakin ingin menghapus departemen "${departemenName}"?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    event.target.submit();
+                }
+            });
+            return false;
+        }
+    </script>
 @endpush

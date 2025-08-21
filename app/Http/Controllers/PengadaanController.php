@@ -314,6 +314,13 @@ class PengadaanController extends Controller
      */
     public function approve(Request $request, PengadaanBarang $pengadaan)
     {
+        // Check if user has permission to approve
+        $currentUser = Auth::user();
+        if (!$currentUser || !in_array($currentUser->role, ['admin', 'super_admin'])) {
+            return redirect()->route('pengadaan.show', $pengadaan)
+                ->with('error', 'Anda tidak memiliki izin untuk approve pengadaan');
+        }
+
         $request->validate([
             'catatan_approval' => 'nullable|string|max:1000',
             'foto_approval' => 'required|image|mimes:jpeg,png,jpg|max:10240' // Max 10MB before compression
@@ -345,6 +352,13 @@ class PengadaanController extends Controller
      */
     public function reject(Request $request, PengadaanBarang $pengadaan)
     {
+        // Check if user has permission to reject
+        $currentUser = Auth::user();
+        if (!$currentUser || !in_array($currentUser->role, ['admin', 'super_admin'])) {
+            return redirect()->route('pengadaan.show', $pengadaan)
+                ->with('error', 'Anda tidak memiliki izin untuk reject pengadaan');
+        }
+
         $request->validate([
             'catatan_approval' => 'required|string'
         ]);
@@ -365,6 +379,13 @@ class PengadaanController extends Controller
      */
     public function complete(PengadaanBarang $pengadaan)
     {
+        // Check if user has permission to complete
+        $currentUser = Auth::user();
+        if (!$currentUser || !in_array($currentUser->role, ['admin', 'super_admin'])) {
+            return redirect()->route('pengadaan.show', $pengadaan)
+                ->with('error', 'Anda tidak memiliki izin untuk menyelesaikan pengadaan');
+        }
+
         // Jika skip approval, tidak perlu status approved
         if (!$pengadaan->skip_approval && $pengadaan->status !== 'approved') {
             return redirect()->route('pengadaan.show', $pengadaan)
@@ -382,6 +403,13 @@ class PengadaanController extends Controller
      */
     public function bypassApproval(Request $request, PengadaanBarang $pengadaan)
     {
+        // Check if user has permission to bypass approval
+        $currentUser = Auth::user();
+        if (!$currentUser || !in_array($currentUser->role, ['admin', 'super_admin'])) {
+            return redirect()->route('pengadaan.show', $pengadaan)
+                ->with('error', 'Anda tidak memiliki izin untuk bypass approval');
+        }
+
         $request->validate([
             'alasan_skip_approval' => 'required|string|max:500',
             'foto_approval' => 'required|image|mimes:jpeg,png,jpg|max:10240' // Max 10MB before compression
