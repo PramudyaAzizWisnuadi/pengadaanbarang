@@ -14,7 +14,7 @@ class PengadaanBarang extends Model
         'nama_pemohon',
         'jabatan',
         'departemen',
-        'keterangan',
+        'alasan_pengadaan',
         'total_estimasi',
         'status',
         'skip_approval',

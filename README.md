@@ -1,97 +1,23 @@
-# 📦 Sistem Pengadaan Barang
+<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-Aplikasi web untuk manajemen pengadaan barang dengan sistem multi-departemen dan role-based access control.
-
-## 🚀 Features
-
--   **Multi-Departemen System**: Setiap departemen memiliki data terpisah
--   **Role-Based Access**: Super Admin, Admin, dan User dengan hak akses berbeda
--   **AJAX DataTables**: Interface modern dan responsive
--   **Approval Workflow**: Sistem persetujuan pengadaan
--   **File Upload**: Upload foto untuk approval
--   **Responsive Design**: Bootstrap 5 dengan mobile support
-
-## 📋 System Requirements
-
--   PHP 8.1+
--   Composer
--   SQLite atau MySQL
--   Node.js & NPM (untuk asset compilation)
-
-## ⚡ Quick Start
-
-### Development Setup
-
-```bash
-# Clone repository
-git clone https://github.com/PramudyaAzizWisnuadi/pengadaanbarang.git
-cd pengadaanbarang
-
-# Install dependencies
-composer install
-npm install
-
-# Setup environment
-cp .env.example .env
-php artisan key:generate
-
-# Database setup
-php artisan migrate --seed
-
-# Start development server
-php artisan serve
-npm run dev
-```
-
-### 🌐 Production Deployment
-
-#### Normal Hosting (VPS/Dedicated)
-
-```bash
-php scripts/deploy-cpanel.php
-```
-
-#### 🚨 cPanel with proc_open() Disabled
-
-If you encounter `Call to undefined function Laravel\Prompts\proc_open()`:
-
-```bash
-php scripts/cpanel-key-generator.php
-```
-
-**Complete cPanel Guide**: [CPANEL-DEPLOYMENT.md](CPANEL-DEPLOYMENT.md)
-
-## 🔑 Default Login Credentials
-
-```
-Super Admin:
-Email: superadmin@mdgroup.id
-Password: Murahsetiaphari
-
-IT Staff:
-Email: staffit@mdgroup.id
-Password: password
-```
-
-## 📖 Documentation
-
--   [Production Deployment Guide](DEPLOYMENT.md)
--   [cPanel Specific Guide](CPANEL-DEPLOYMENT.md)
--   [Database Migration Guide](database/README.md)
-
----
+<p align="center">
+<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+</p>
 
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
 
--   [Simple, fast routing engine](https://laravel.com/docs/routing).
--   [Powerful dependency injection container](https://laravel.com/docs/container).
--   Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
--   Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
--   Database agnostic [schema migrations](https://laravel.com/docs/migrations).
--   [Robust background job processing](https://laravel.com/docs/queues).
--   [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- [Simple, fast routing engine](https://laravel.com/docs/routing).
+- [Powerful dependency injection container](https://laravel.com/docs/container).
+- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
+- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
+- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
+- [Robust background job processing](https://laravel.com/docs/queues).
+- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
 Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
@@ -109,14 +35,14 @@ We would like to extend our thanks to the following sponsors for funding Laravel
 
 ### Premium Partners
 
--   **[Vehikl](https://vehikl.com)**
--   **[Tighten Co.](https://tighten.co)**
--   **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
--   **[64 Robots](https://64robots.com)**
--   **[Curotec](https://www.curotec.com/services/technologies/laravel)**
--   **[DevSquad](https://devsquad.com/hire-laravel-developers)**
--   **[Redberry](https://redberry.international/laravel-development)**
--   **[Active Logic](https://activelogic.com)**
+- **[Vehikl](https://vehikl.com)**
+- **[Tighten Co.](https://tighten.co)**
+- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
+- **[64 Robots](https://64robots.com)**
+- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
+- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
+- **[Redberry](https://redberry.international/laravel-development)**
+- **[Active Logic](https://activelogic.com)**
 
 ## Contributing
 
