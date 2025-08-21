@@ -73,6 +73,13 @@ Route::middleware('auth')->group(function () {
     Route::put('departemen/{departemen}', [DepartemenController::class, 'update'])->name('departemen.update');
     Route::delete('departemen/{departemen}', [DepartemenController::class, 'destroy'])->name('departemen.destroy');
 
+    // Notification routes
+    Route::get('notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('notifications/{id}/mark-as-read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.mark-as-read');
+    Route::post('notifications/mark-all-as-read', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-as-read');
+    Route::get('api/notifications/unread-count', [\App\Http\Controllers\NotificationController::class, 'getUnreadCount'])->name('api.notifications.unread-count');
+    Route::get('api/notifications/recent', [\App\Http\Controllers\NotificationController::class, 'getRecent'])->name('api.notifications.recent');
+
     // API routes for AJAX
     Route::get('api/kategori-by-departemen/{departemen}', [KategoriController::class, 'getKategoriByDepartemen'])->name('api.kategori-by-departemen');
 });

@@ -21,7 +21,7 @@
         <!-- SweetAlert2 CSS -->
         <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.27/dist/sweetalert2.min.css" rel="stylesheet">
 
-        <!-- Custom CSS -->
+        /* Custom CSS */
         <style>
             :root {
                 --sidebar-width: 260px;
@@ -275,6 +275,22 @@
                             href="{{ route('pengadaan.create') }}">
                             <i class="bi bi-plus-circle"></i>
                             Pengadaan Baru
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('notifications.*') ? 'active' : '' }}"
+                            href="{{ route('notifications.index') }}">
+                            <i class="bi bi-bell"></i>
+                            Notifikasi
+                            @php
+                                $unreadCount = \App\Models\Notification::where('user_id', auth()->id())
+                                    ->where('is_read', false)
+                                    ->count();
+                            @endphp
+                            @if ($unreadCount > 0)
+                                <span class="badge bg-danger ms-auto">{{ $unreadCount }}</span>
+                            @endif
                         </a>
                     </li>
 

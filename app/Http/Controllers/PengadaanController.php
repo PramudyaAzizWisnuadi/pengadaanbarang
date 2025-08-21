@@ -6,6 +6,7 @@ use App\Models\PengadaanBarang;
 use App\Models\BarangPengadaan;
 use App\Models\KategoriBarang;
 use App\Exports\PengadaanExport;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +16,13 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class PengadaanController extends Controller
 {
+    protected $notificationService;
+
+    public function __construct(NotificationService $notificationService)
+    {
+        $this->notificationService = $notificationService;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -305,6 +313,9 @@ class PengadaanController extends Controller
 
         $pengadaan->update(['status' => 'submitted']);
 
+        // Send notification to department admins
+        $this->notificationService->notifyDepartmentAdminsOnNewPengadaan($pengadaan);
+
         return redirect()->route('pengadaan.show', $pengadaan)
             ->with('success', 'Pengadaan berhasil disubmit untuk approval');
     }
@@ -335,6 +346,7 @@ class PengadaanController extends Controller
         $imageService = new \App\Services\ImageCompressionService();
         $fotoPath = $imageService->compressImage($request->file('foto_approval'));
 
+        $oldStatus = $pengadaan->status;
         $pengadaan->update([
             'status' => 'approved',
             'approved_by' => Auth::id(),
@@ -342,6 +354,9 @@ class PengadaanController extends Controller
             'catatan_approval' => $request->catatan_approval,
             'foto_approval' => $fotoPath
         ]);
+
+        // Send notification feedback to requester
+        $this->notificationService->notifyRequesterOnStatusUpdate($pengadaan, $oldStatus, 'approved');
 
         return redirect()->route('pengadaan.show', $pengadaan)
             ->with('success', 'Pengadaan berhasil diapprove');
@@ -363,12 +378,16 @@ class PengadaanController extends Controller
             'catatan_approval' => 'required|string'
         ]);
 
+        $oldStatus = $pengadaan->status;
         $pengadaan->update([
             'status' => 'rejected',
             'approved_by' => Auth::id(),
             'tanggal_approval' => now(),
             'catatan_approval' => $request->catatan_approval
         ]);
+
+        // Send notification feedback to requester
+        $this->notificationService->notifyRequesterOnStatusUpdate($pengadaan, $oldStatus, 'rejected');
 
         return redirect()->route('pengadaan.show', $pengadaan)
             ->with('success', 'Pengadaan berhasil direject');

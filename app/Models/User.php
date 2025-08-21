@@ -89,4 +89,28 @@ class User extends Authenticatable
     {
         return $this->role === 'user';
     }
+
+    /**
+     * Get the notifications for the user.
+     */
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
+    }
+
+    /**
+     * Get unread notifications count.
+     */
+    public function unreadNotificationsCount()
+    {
+        return $this->notifications()->unread()->count();
+    }
+
+    /**
+     * Check if user is admin of a specific department.
+     */
+    public function isAdminOfDepartment($departemenId)
+    {
+        return $this->isAdmin() && $this->departemen_id == $departemenId;
+    }
 }
