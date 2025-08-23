@@ -609,7 +609,7 @@
                     <th>Jumlah</th>
                     <th>Harga Est.</th>
                     <th>Total</th>
-                    {{-- <th>Prioritas</th> --}}
+                    <th>Prioritas</th>
                 </tr>
             </thead>
             <tbody>
@@ -628,7 +628,7 @@
                         <td>{{ $barang->jumlah }} {{ $barang->satuan }}</td>
                         <td>Rp {{ number_format($barang->harga_estimasi, 0, ',', '.') }}</td>
                         <td>Rp {{ number_format($barang->total_harga, 0, ',', '.') }}</td>
-                        {{-- <td>
+                        <td>
                             <span class="priority-badge priority-{{ $barang->prioritas }}">
                                 @if ($barang->prioritas == 1)
                                     Tinggi
@@ -640,7 +640,7 @@
                                     P{{ $barang->prioritas }}
                                 @endif
                             </span>
-                        </td> --}}
+                        </td>
                     </tr>
                     @if ($barang->keterangan)
                         <tr>
