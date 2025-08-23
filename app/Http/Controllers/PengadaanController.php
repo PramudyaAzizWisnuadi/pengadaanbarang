@@ -52,19 +52,37 @@ class PengadaanController extends Controller
                 $baseQuery->where('status', $request->status);
             }
 
+            // Filter by pemohon
+            if ($request->filled('pemohon')) {
+                $baseQuery->where('nama_pemohon', 'like', '%' . $request->pemohon . '%');
+            }
+
             // Filter by tanggal pengajuan
             if ($request->filled('tanggal')) {
                 $baseQuery->whereDate('tanggal_pengajuan', $request->tanggal);
             }
         }
 
-        // Fetch pengadaan data for blade template
+        // Global search functionality (available for all users)
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $baseQuery->where(function($query) use ($searchTerm) {
+                $query->where('kode_pengadaan', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('nama_pemohon', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('departemen', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('keterangan', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('jabatan', 'like', '%' . $searchTerm . '%');
+            });
+        }
+
+        // Fetch pengadaan data for blade template with pagination
+        $perPage = $request->get('per_page', 15); // Default 15 items per page
         $pengadaans = (clone $baseQuery)
             ->with(['barangPengadaan'])
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate($perPage); // Dynamic pagination
 
-        // Calculate statistics efficiently
+        // Calculate statistics efficiently (using original query without pagination)
         $statistics = (clone $baseQuery)
             ->selectRaw('
                 COUNT(*) as total,

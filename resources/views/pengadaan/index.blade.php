@@ -3,10 +3,6 @@
 @section('title', 'Dashboard Pengadaan')
 
 @push('styles')
-    <!-- DataTables CSS -->
-    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
-    <link href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css" rel="stylesheet">
-    
     <style>
         .status-badge {
             padding: 4px 8px;
@@ -40,27 +36,42 @@
             color: white;
         }
 
-        /* Custom DataTables styling */
-        .dataTables_wrapper .dataTables_length select {
-            padding: 0.375rem 0.75rem;
-            border: 1px solid #ced4da;
-            border-radius: 0.375rem;
+        /* Custom Pagination Styling */
+        .pagination {
+            margin-bottom: 0;
+        }
+        
+        .pagination .page-link {
+            color: #6c757d;
+            border-color: #dee2e6;
+        }
+        
+        .pagination .page-item.active .page-link {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        
+        .pagination .page-link:hover {
+            color: #0d6efd;
+            background-color: #e9ecef;
+            border-color: #dee2e6;
         }
 
-        .dataTables_wrapper .dataTables_filter input {
-            padding: 0.375rem 0.75rem;
-            border: 1px solid #ced4da;
-            border-radius: 0.375rem;
-            margin-left: 0.5rem;
+        /* Search highlight */
+        .search-highlight {
+            background-color: #fff3cd;
+            padding: 1px 3px;
+            border-radius: 3px;
+            font-weight: 600;
         }
 
-        .table th {
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .table th:hover {
-            background-color: #f8f9fa;
+        /* Search info styling */
+        .search-info {
+            background-color: #e7f3ff;
+            border: 1px solid #b6d7ff;
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin-bottom: 15px;
         }
     </style>
 @endpush
@@ -203,7 +214,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label for="filter_status" class="form-label">Status</label>
                             <select class="form-select form-select-sm" id="filter_status" name="status">
                                 <option value="">Semua Status</option>
@@ -218,12 +229,26 @@
                                     Completed</option>
                             </select>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
+                            <label for="filter_pemohon" class="form-label">Pemohon</label>
+                            <input type="text" class="form-control form-control-sm" id="filter_pemohon" name="pemohon"
+                                value="{{ request('pemohon') }}" placeholder="Nama pemohon...">
+                        </div>
+                        <div class="col-md-2">
                             <label for="filter_tanggal" class="form-label">Tanggal Pengajuan</label>
                             <input type="date" class="form-control form-control-sm" id="filter_tanggal" name="tanggal"
                                 value="{{ request('tanggal') }}">
                         </div>
-                        <div class="col-md-3 d-flex align-items-end">
+                        <div class="col-md-2">
+                            <label for="per_page" class="form-label">Per Halaman</label>
+                            <select class="form-select form-select-sm" id="per_page" name="per_page">
+                                <option value="15" {{ request('per_page') == '15' ? 'selected' : '' }}>15</option>
+                                <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25</option>
+                                <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>50</option>
+                                <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100</option>
+                            </select>
+                        </div>
+                        <div class="col-md-1 d-flex align-items-end">
                             <div class="btn-group w-100" role="group">
                                 <button type="submit" class="btn btn-primary btn-sm">
                                     <i class="bi bi-search me-1"></i>
@@ -240,10 +265,66 @@
             </div>
         @endif
 
+        <!-- Search Bar for All Users -->
+        <div class="card-body border-top">
+            <form method="GET" action="{{ route('pengadaan.index') }}" class="row g-3 align-items-end">
+                <!-- Preserve existing filters -->
+                @if (Auth::user()->role === 'super_admin')
+                    <input type="hidden" name="departemen" value="{{ request('departemen') }}">
+                    <input type="hidden" name="status" value="{{ request('status') }}">
+                    <input type="hidden" name="pemohon" value="{{ request('pemohon') }}">
+                    <input type="hidden" name="tanggal" value="{{ request('tanggal') }}">
+                @endif
+                <input type="hidden" name="per_page" value="{{ request('per_page', 15) }}">
+                
+                <div class="col-md-10">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" class="form-control" name="search" 
+                               value="{{ request('search') }}" 
+                               placeholder="Cari berdasarkan kode pengadaan, nama pemohon, departemen, atau keterangan...">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="btn-group w-100" role="group">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search me-1"></i>
+                            Cari
+                        </button>
+                        @if (request('search'))
+                            <a href="{{ route('pengadaan.index') }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i>
+                            </a>
+                        @endif
+                    </div>
+                </div>
+            </form>
+        </div>
+
         <div class="card-body">
+            @if (request('search'))
+                <div class="search-info">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi bi-search me-2"></i>
+                            <strong>Hasil pencarian untuk:</strong> "{{ request('search') }}"
+                            @if ($pengadaans->total() > 0)
+                                <span class="text-muted">({{ $pengadaans->total() }} data ditemukan)</span>
+                            @endif
+                        </div>
+                        <a href="{{ route('pengadaan.index') }}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-x me-1"></i>
+                            Hapus Pencarian
+                        </a>
+                    </div>
+                </div>
+            @endif
+
             @if ($pengadaans->count() > 0)
                 <div class="table-responsive">
-                    <table id="pengadaanTable" class="table table-hover">
+                    <table class="table table-hover">
                         <thead class="table-light">
                             <tr>
                                 <th>No</th>
@@ -252,7 +333,6 @@
                                 <th>Departemen</th>
                                 <th>Tanggal</th>
                                 <th>Jumlah Barang</th>
-                                <th>Total Estimasi</th>
                                 <th>Keperluan</th>
                                 <th>Status</th>
                                 <th>Aksi</th>
@@ -261,15 +341,14 @@
                         <tbody>
                             @foreach ($pengadaans as $index => $pengadaan)
                                 <tr>
-                                    <td>{{ $index + 1 }}</td>
+                                    <td>{{ ($pengadaans->currentPage() - 1) * $pengadaans->perPage() + $index + 1 }}</td>
                                     <td>{{ $pengadaan->kode_pengadaan }}</td>
                                     <td>{{ $pengadaan->nama_pemohon }}</td>
                                     <td>{{ $pengadaan->departemen }}</td>
-                                    <td data-order="{{ $pengadaan->created_at->timestamp }}">{{ $pengadaan->created_at->format('d/m/Y H:i') }}</td>
-                                    <td data-order="{{ $pengadaan->barangPengadaan->sum('jumlah') }}">{{ $pengadaan->barangPengadaan->sum('jumlah') }}</td>
-                                    <td data-order="{{ $pengadaan->total_estimasi }}">Rp {{ number_format($pengadaan->total_estimasi, 0, ',', '.') }}</td>
+                                    <td>{{ $pengadaan->created_at->format('d/m/Y H:i') }}</td>
+                                    <td>{{ $pengadaan->barangPengadaan->sum('jumlah') }}</td>
                                     <td>{{ Str::limit($pengadaan->keterangan ?? '', 30) }}</td>
-                                    <td data-order="{{ $pengadaan->status }}">
+                                    <td>
                                         @switch($pengadaan->status)
                                             @case('draft')
                                                 <span class="status-badge status-draft">Draft</span>
@@ -307,7 +386,7 @@
                                                 <i class="bi bi-eye"></i>
                                             </a>
 
-                                            @if ($pengadaan->status === 'draft')
+                                            @if ($pengadaan->status === 'draft' || (in_array(Auth::user()->role, ['admin', 'super_admin']) && $pengadaan->status === 'submitted'))
                                                 <a href="{{ route('pengadaan.edit', $pengadaan) }}"
                                                     class="btn btn-outline-warning" title="Edit">
                                                     <i class="bi bi-pencil"></i>
@@ -327,6 +406,32 @@
                         </tbody>
                     </table>
                 </div>
+                
+                <!-- Pagination -->
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="text-muted small">
+                        @if($pengadaans->total() > 0)
+                            Menampilkan {{ $pengadaans->firstItem() }} sampai {{ $pengadaans->lastItem() }} 
+                            dari {{ $pengadaans->total() }} data
+                            @if(request()->hasAny(['departemen', 'status', 'pemohon', 'tanggal', 'search']))
+                                @if(request('search'))
+                                    (hasil pencarian: "{{ request('search') }}")
+                                @else
+                                    (difilter)
+                                @endif
+                            @endif
+                        @else
+                            @if(request('search'))
+                                Tidak ada data ditemukan untuk pencarian: "{{ request('search') }}"
+                            @else
+                                Tidak ada data ditemukan
+                            @endif
+                        @endif
+                    </div>
+                    <div>
+                        {{ $pengadaans->appends(request()->query())->links() }}
+                    </div>
+                </div>
             @else
                 <div class="text-center py-5">
                     <i class="bi bi-inbox display-1 text-muted"></i>
@@ -339,56 +444,22 @@
 @endsection
 
 @push('scripts')
-    <!-- DataTables JS -->
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script>
+    // Function to highlight search terms
+    function highlightSearchTerms() {
+        const searchTerm = '{{ request("search") }}';
+        if (searchTerm) {
+            const cells = document.querySelectorAll('table tbody td');
+            cells.forEach(cell => {
+                if (cell.textContent.toLowerCase().includes(searchTerm.toLowerCase())) {
+                    const regex = new RegExp(`(${searchTerm})`, 'gi');
+                    cell.innerHTML = cell.innerHTML.replace(regex, '<span class="search-highlight">$1</span>');
+                }
+            });
+        }
+    }
 
-    <script>
-        $(document).ready(function() {
-            console.log('jQuery version:', $.fn.jquery);
-            console.log('DataTables available:', typeof $.fn.DataTable);
-            
-            // Check if table exists
-            if ($('#pengadaanTable').length === 0) {
-                console.error('Table #pengadaanTable not found!');
-                return;
-            }
-
-            console.log('Table found, initializing DataTables...');
-            
-            try {
-                var table = $('#pengadaanTable').DataTable({
-                    pageLength: 25,
-                    order: [[4, 'desc']], // Default sort by tanggal (descending)
-                    columnDefs: [
-                        {
-                            targets: [0, 9], // Column "No" dan "Aksi"
-                            orderable: false,
-                            searchable: false
-                        }
-                    ],
-                    language: {
-                        search: "Cari:",
-                        lengthMenu: "Tampilkan _MENU_ data per halaman",
-                        info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-                        infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
-                        infoFiltered: "(difilter dari _MAX_ total data)",
-                        paginate: {
-                            first: "Pertama",
-                            last: "Terakhir", 
-                            next: "Selanjutnya",
-                            previous: "Sebelumnya"
-                        },
-                        emptyTable: "Tidak ada data yang tersedia",
-                        zeroRecords: "Tidak ditemukan data yang sesuai"
-                    }
-                });
-                
-                console.log('DataTables initialized successfully!');
-                
-            } catch (error) {
-                console.error('Error initializing DataTables:', error);
-            }
-        });
-    </script>
+    // Run highlighting when page loads
+    document.addEventListener('DOMContentLoaded', highlightSearchTerms);
+</script>
 @endpush

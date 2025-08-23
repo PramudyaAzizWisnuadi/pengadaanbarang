@@ -558,8 +558,8 @@
         </div>
 
         <div class="header">
-            <h1>Pengadaan Barang</h1>
-            <h2>MD Mall </h2>
+            <h1>Form Pengadaan Barang</h1>
+            <h2>MD Mall</h2>
         </div>
 
         <div class="info-section">
@@ -609,6 +609,7 @@
                     <th>Jumlah</th>
                     <th>Harga Est.</th>
                     <th>Total</th>
+                    {{-- <th>Prioritas</th> --}}
                 </tr>
             </thead>
             <tbody>
@@ -619,11 +620,27 @@
                         <td>{{ $barang->kategoriBarang->nama_kategori ?? '-' }}</td>
                         <td>
                             <strong>{{ $barang->nama_barang }}</strong>
+                            {{-- @if ($barang->merk)
+                                <br><small>Merk: {{ $barang->merk }}</small>
+                            @endif --}}
                         </td>
                         <td>{{ $barang->spesifikasi ?? '-' }}</td>
                         <td>{{ $barang->jumlah }} {{ $barang->satuan }}</td>
                         <td>Rp {{ number_format($barang->harga_estimasi, 0, ',', '.') }}</td>
                         <td>Rp {{ number_format($barang->total_harga, 0, ',', '.') }}</td>
+                        {{-- <td>
+                            <span class="priority-badge priority-{{ $barang->prioritas }}">
+                                @if ($barang->prioritas == 1)
+                                    Tinggi
+                                @elseif($barang->prioritas == 2)
+                                    Sedang
+                                @elseif($barang->prioritas == 3)
+                                    Rendah
+                                @else
+                                    P{{ $barang->prioritas }}
+                                @endif
+                            </span>
+                        </td> --}}
                     </tr>
                     @if ($barang->keterangan)
                         <tr>
