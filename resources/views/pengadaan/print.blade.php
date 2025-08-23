@@ -608,7 +608,7 @@
                     <th>Spesifikasi</th>
                     <th>Jumlah</th>
                     <th>Harga Est.</th>
-                    <th>Total asdsd</th>
+                    <th>Total</th>
                 </tr>
             </thead>
             <tbody>
