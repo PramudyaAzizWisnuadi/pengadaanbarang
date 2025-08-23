@@ -21,8 +21,9 @@
         <!-- SweetAlert2 CSS -->
         <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.27/dist/sweetalert2.min.css" rel="stylesheet">
 
-        /* Custom CSS */
+        <!-- Custom CSS -->
         <style>
+            /* Custom CSS */
             :root {
                 --sidebar-width: 260px;
                 --sidebar-bg: #1e2139;
