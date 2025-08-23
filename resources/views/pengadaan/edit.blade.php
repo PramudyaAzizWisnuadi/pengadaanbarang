@@ -8,6 +8,14 @@
             <h5 class="mb-0">Edit Pengadaan Barang - {{ $pengadaan->kode_pengadaan }}</h5>
         </div>
         <div class="card-body">
+            @if ($pengadaan->status === 'submitted' && in_array(Auth::user()->role, ['admin', 'super_admin']))
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Pengadaan Submitted:</strong> Anda dapat mengedit pengadaan ini sebagai admin. 
+                    Centang "Reset ke Draft" jika ingin mengembalikan status ke draft setelah update.
+                </div>
+            @endif
+            
             <form action="{{ route('pengadaan.update', $pengadaan) }}" method="POST" id="pengadaanForm">
                 @csrf
                 @method('PUT')
@@ -200,10 +208,21 @@
                         <i class="bi bi-arrow-left me-1"></i>
                         Kembali
                     </a>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-save me-1"></i>
-                        Update Pengadaan
-                    </button>
+                    <div class="d-flex align-items-center gap-3">
+                        @if ($pengadaan->status === 'submitted' && in_array(Auth::user()->role, ['admin', 'super_admin']))
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="reset_to_draft" value="1" id="resetToDraft">
+                                <label class="form-check-label text-warning" for="resetToDraft">
+                                    <i class="bi bi-arrow-clockwise me-1"></i>
+                                    Reset ke Draft
+                                </label>
+                            </div>
+                        @endif
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-1"></i>
+                            Update Pengadaan
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>

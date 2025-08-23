@@ -3,6 +3,10 @@
 @section('title', 'Dashboard Pengadaan')
 
 @push('styles')
+    <!-- DataTables CSS -->
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css" rel="stylesheet">
+    
     <style>
         .status-badge {
             padding: 4px 8px;
@@ -34,6 +38,29 @@
         .status-completed {
             background-color: #0d6efd;
             color: white;
+        }
+
+        /* Custom DataTables styling */
+        .dataTables_wrapper .dataTables_length select {
+            padding: 0.375rem 0.75rem;
+            border: 1px solid #ced4da;
+            border-radius: 0.375rem;
+        }
+
+        .dataTables_wrapper .dataTables_filter input {
+            padding: 0.375rem 0.75rem;
+            border: 1px solid #ced4da;
+            border-radius: 0.375rem;
+            margin-left: 0.5rem;
+        }
+
+        .table th {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .table th:hover {
+            background-color: #f8f9fa;
         }
     </style>
 @endpush
@@ -216,7 +243,7 @@
         <div class="card-body">
             @if ($pengadaans->count() > 0)
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table id="pengadaanTable" class="table table-hover">
                         <thead class="table-light">
                             <tr>
                                 <th>No</th>
@@ -225,6 +252,7 @@
                                 <th>Departemen</th>
                                 <th>Tanggal</th>
                                 <th>Jumlah Barang</th>
+                                <th>Total Estimasi</th>
                                 <th>Keperluan</th>
                                 <th>Status</th>
                                 <th>Aksi</th>
@@ -237,10 +265,11 @@
                                     <td>{{ $pengadaan->kode_pengadaan }}</td>
                                     <td>{{ $pengadaan->nama_pemohon }}</td>
                                     <td>{{ $pengadaan->departemen }}</td>
-                                    <td>{{ $pengadaan->created_at->format('d/m/Y H:i') }}</td>
-                                    <td>{{ $pengadaan->barangPengadaan->sum('jumlah') }}</td>
+                                    <td data-order="{{ $pengadaan->created_at->timestamp }}">{{ $pengadaan->created_at->format('d/m/Y H:i') }}</td>
+                                    <td data-order="{{ $pengadaan->barangPengadaan->sum('jumlah') }}">{{ $pengadaan->barangPengadaan->sum('jumlah') }}</td>
+                                    <td data-order="{{ $pengadaan->total_estimasi }}">Rp {{ number_format($pengadaan->total_estimasi, 0, ',', '.') }}</td>
                                     <td>{{ Str::limit($pengadaan->keterangan ?? '', 30) }}</td>
-                                    <td>
+                                    <td data-order="{{ $pengadaan->status }}">
                                         @switch($pengadaan->status)
                                             @case('draft')
                                                 <span class="status-badge status-draft">Draft</span>
@@ -308,3 +337,58 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            console.log('jQuery version:', $.fn.jquery);
+            console.log('DataTables available:', typeof $.fn.DataTable);
+            
+            // Check if table exists
+            if ($('#pengadaanTable').length === 0) {
+                console.error('Table #pengadaanTable not found!');
+                return;
+            }
+
+            console.log('Table found, initializing DataTables...');
+            
+            try {
+                var table = $('#pengadaanTable').DataTable({
+                    pageLength: 25,
+                    order: [[4, 'desc']], // Default sort by tanggal (descending)
+                    columnDefs: [
+                        {
+                            targets: [0, 9], // Column "No" dan "Aksi"
+                            orderable: false,
+                            searchable: false
+                        }
+                    ],
+                    language: {
+                        search: "Cari:",
+                        lengthMenu: "Tampilkan _MENU_ data per halaman",
+                        info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                        infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
+                        infoFiltered: "(difilter dari _MAX_ total data)",
+                        paginate: {
+                            first: "Pertama",
+                            last: "Terakhir", 
+                            next: "Selanjutnya",
+                            previous: "Sebelumnya"
+                        },
+                        emptyTable: "Tidak ada data yang tersedia",
+                        zeroRecords: "Tidak ditemukan data yang sesuai"
+                    }
+                });
+                
+                console.log('DataTables initialized successfully!');
+                
+            } catch (error) {
+                console.error('Error initializing DataTables:', error);
+            }
+        });
+    </script>
+@endpush

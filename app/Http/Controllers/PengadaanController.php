@@ -197,9 +197,23 @@ class PengadaanController extends Controller
      */
     public function edit(PengadaanBarang $pengadaan)
     {
-        if ($pengadaan->status !== 'draft') {
+        // Check if user can edit this pengadaan
+        $canEdit = false;
+        
+        // Owner can edit draft pengadaan
+        if ($pengadaan->user_id === Auth::user()->id && $pengadaan->status === 'draft') {
+            $canEdit = true;
+        }
+        
+        // Admin and super_admin can edit draft and submitted pengadaan
+        if (in_array(Auth::user()->role, ['admin', 'super_admin']) && 
+            in_array($pengadaan->status, ['draft', 'submitted'])) {
+            $canEdit = true;
+        }
+        
+        if (!$canEdit) {
             return redirect()->route('pengadaan.show', $pengadaan)
-                ->with('error', 'Pengadaan hanya dapat diedit pada status draft');
+                ->with('error', 'Anda tidak memiliki izin untuk mengedit pengadaan ini');
         }
 
         // Filter categories by user's department if they have one
@@ -221,9 +235,23 @@ class PengadaanController extends Controller
      */
     public function update(Request $request, PengadaanBarang $pengadaan)
     {
-        if ($pengadaan->status !== 'draft') {
+        // Check if user can update this pengadaan
+        $canUpdate = false;
+        
+        // Owner can update draft pengadaan
+        if ($pengadaan->user_id === Auth::user()->id && $pengadaan->status === 'draft') {
+            $canUpdate = true;
+        }
+        
+        // Admin and super_admin can update draft and submitted pengadaan
+        if (in_array(Auth::user()->role, ['admin', 'super_admin']) && 
+            in_array($pengadaan->status, ['draft', 'submitted'])) {
+            $canUpdate = true;
+        }
+        
+        if (!$canUpdate) {
             return redirect()->route('pengadaan.show', $pengadaan)
-                ->with('error', 'Pengadaan hanya dapat diedit pada status draft');
+                ->with('error', 'Anda tidak memiliki izin untuk mengupdate pengadaan ini');
         }
 
         $request->validate([
@@ -243,6 +271,9 @@ class PengadaanController extends Controller
         ]);
 
         DB::transaction(function () use ($request, $pengadaan) {
+            // Store original status
+            $originalStatus = $pengadaan->status;
+            
             // Update pengadaan
             $pengadaan->update([
                 'nama_pemohon' => $request->nama_pemohon,
@@ -279,6 +310,13 @@ class PengadaanController extends Controller
 
             // Update total estimasi
             $pengadaan->update(['total_estimasi' => $totalEstimasi]);
+            
+            // If admin/super_admin edited a submitted pengadaan, give option to reset to draft
+            if ($originalStatus === 'submitted' && 
+                in_array(Auth::user()->role, ['admin', 'super_admin']) && 
+                $request->has('reset_to_draft') && $request->reset_to_draft == '1') {
+                $pengadaan->update(['status' => 'draft']);
+            }
         });
 
         return redirect()->route('pengadaan.show', $pengadaan)

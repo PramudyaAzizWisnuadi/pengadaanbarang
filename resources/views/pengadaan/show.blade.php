@@ -204,7 +204,7 @@
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
-                        @if ($pengadaan->status === 'draft')
+                        @if ($pengadaan->status === 'draft' && Auth::user()->id === $pengadaan->user_id)
                             <a href="{{ route('pengadaan.edit', $pengadaan) }}" class="btn btn-warning">
                                 <i class="bi bi-pencil me-1"></i>
                                 Edit Pengadaan
@@ -221,6 +221,11 @@
                         @endif
 
                         @if ($pengadaan->status === 'submitted' && in_array(Auth::user()->role, ['admin', 'super_admin']))
+                            <a href="{{ route('pengadaan.edit', $pengadaan) }}" class="btn btn-warning">
+                                <i class="bi bi-pencil me-1"></i>
+                                Edit Pengadaan
+                            </a>
+                            
                             <button type="button" class="btn btn-success" data-bs-toggle="modal"
                                 data-bs-target="#approveModal">
                                 <i class="bi bi-check-circle me-1"></i>
